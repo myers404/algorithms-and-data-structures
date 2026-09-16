@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Staff infra system design reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --band:#E7EDF1; --ink:#17212C; --muted:#586A7B; --rule:#CAD3DA;
+  --accent:#A95F00; --accent-soft:#F6E7D2; --link:#1D5A86;
+  --serif:"IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --cond:"IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151C; --surface:#161F29; --band:#1C2733; --ink:#E1E7ED; --muted:#94A5B5; --rule:#2B3947;
+    --accent:#E9A23B; --accent-soft:#3A2B17; --link:#8CC2EA;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#161F29; --band:#1C2733; --ink:#E1E7ED; --muted:#94A5B5; --rule:#2B3947;
+  --accent:#E9A23B; --accent-soft:#3A2B17; --link:#8CC2EA;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1rem}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+img{max-width:100%}
+
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:0;max-width:1440px;margin:0 auto}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:1.75rem 1.25rem 3rem 1.5rem;border-right:1px solid var(--rule);font-size:.875rem}
+nav.toc a{display:block;padding:.18rem 0;color:var(--ink);text-decoration:none}
+nav.toc a:hover{color:var(--accent)}
+nav.toc .navhead{font-family:var(--serif);font-weight:600;font-size:1rem;margin:1.4rem 0 .3rem}
+nav.toc .navgroup{color:var(--muted);font-style:italic;margin:.7rem 0 .1rem;font-size:.8125rem}
+.toc-title{font-family:var(--serif);font-weight:600;font-size:1.05rem;margin:0 0 1rem;line-height:1.3}
+main{padding:2.5rem clamp(1rem,4vw,3.5rem) 6rem;min-width:0}
+
+header.hero{max-width:52rem;margin-bottom:2.5rem}
+header.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,4.2vw,3.1rem);line-height:1.1;letter-spacing:-.01em;margin:0 0 1rem}
+header.hero p{max-width:40rem;margin:.5rem 0;color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;margin-top:1.25rem;font-size:.9rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:.45rem}
+.toggle{font:inherit;font-size:.875rem;background:var(--surface);color:var(--ink);border:1px solid var(--rule);padding:.35rem .75rem;border-radius:4px;cursor:pointer}
+.toggle[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.6rem,2.8vw,2.1rem);margin:4rem 0 .5rem;line-height:1.2}
+h2 + .lede{max-width:44rem;color:var(--muted);margin:0 0 1.5rem}
+h3.group{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.35rem;color:var(--muted);margin:3rem 0 0;padding-top:1rem;border-top:3px double var(--rule)}
+h4{font-family:var(--serif);font-weight:600;font-size:1.45rem;margin:0 0 .25rem;line-height:1.25}
+h5{font-family:var(--sans);font-weight:600;font-size:.95rem;margin:0 0 .4rem}
+
+.scroll{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--rule);background:var(--surface);border-radius:3px}
+table{border-collapse:collapse;width:100%}
+
+/* crosswalk */
+.matrix{font-family:var(--cond);font-size:.875rem;min-width:900px}
+.matrix thead th{vertical-align:bottom;padding:.6rem .2rem;border-bottom:2px solid var(--ink);font-weight:600;background:var(--surface)}
+.matrix thead th a{color:var(--ink);text-decoration:none;display:block}
+.matrix thead th a span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;white-space:nowrap;line-height:1.1}
+.matrix thead th a:hover{color:var(--accent)}
+.matrix th.corner{text-align:left;padding-left:.9rem;font-family:var(--serif);font-size:1rem;font-weight:500}
+.matrix tbody th{text-align:left;font-weight:400;padding:.45rem .9rem;white-space:nowrap;position:sticky;left:0;background:var(--surface);border-right:1px solid var(--rule)}
+.matrix tbody th a{color:var(--ink);text-decoration:none}
+.matrix tbody th a:hover{color:var(--accent)}
+.matrix td{text-align:center;padding:.35rem .25rem;border-left:1px solid var(--band);min-width:2.4rem}
+.matrix tbody tr{border-top:1px solid var(--band)}
+.matrix .hl{background:var(--accent-soft)}
+.matrix tbody th.hl{background:var(--accent-soft)}
+.dot{display:inline-block;width:.85rem;height:.85rem;border-radius:50%;vertical-align:middle}
+.dot.c{background:var(--accent)}
+.dot.s{border:2px solid var(--accent);background:transparent}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* primitives */
+.prim{margin:2.25rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.prim .question{font-family:var(--serif);font-style:italic;font-size:1.1rem;line-height:1.5;margin:0 0 1rem;max-width:44rem;color:var(--muted)}
+.opts{font-family:var(--cond);font-size:.9rem;line-height:1.4;min-width:860px}
+.opts thead th{text-align:left;font-weight:600;padding:.55rem .7rem;background:var(--band);border-bottom:1px solid var(--rule)}
+.opts tbody th{text-align:left;font-weight:600;vertical-align:top;padding:.6rem .7rem;width:15%}
+.opts td{vertical-align:top;padding:.6rem .7rem;border-left:1px solid var(--band)}
+.opts tbody tr + tr{border-top:1px solid var(--band)}
+.opts td:nth-child(4){color:var(--ink)}
+.probes{margin:1.1rem 0 0;padding:.2rem 0 .2rem 1rem;border-left:3px solid var(--accent);max-width:52rem}
+.probes ul{margin:0;padding-left:1.1rem}
+.probes li{margin:.3rem 0}
+.hint{color:var(--muted)}
+body.hide-hints .hint{display:none}
+.usedin{font-size:.875rem;color:var(--muted);margin:.9rem 0 0;max-width:52rem}
+
+/* prompts */
+.prompt{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.25rem 1.4rem 1.35rem;margin:1.1rem 0}
+.prompt .central{margin:.2rem 0 .8rem;max-width:48rem;font-size:1.02rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 1rem}
+.chip{font-family:var(--cond);font-size:.8125rem;text-decoration:none;padding:.15rem .55rem;border-radius:999px;border:1.5px solid var(--accent);color:var(--ink)}
+.chip.c{background:var(--accent);color:var(--bg);font-weight:600}
+.chip:hover{text-decoration:underline}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.two ul{margin:0;padding-left:1.1rem}
+.two li{margin:.25rem 0}
+.prompt .probes{margin:0}
+
+/* patterns, themes, numbers */
+.pat{font-family:var(--cond);font-size:.9rem;line-height:1.4;min-width:900px}
+.pat thead th{text-align:left;font-weight:600;padding:.55rem .7rem;background:var(--band)}
+.pat tbody th{text-align:left;vertical-align:top;padding:.6rem .7rem;font-weight:600;width:13%}
+.pat td{vertical-align:top;padding:.6rem .7rem;border-left:1px solid var(--band)}
+.pat tbody tr + tr{border-top:1px solid var(--band)}
+dl.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:0 2rem;margin:0}
+.theme{padding:.9rem 0;border-top:1px solid var(--rule)}
+.theme dt{font-family:var(--serif);font-weight:600;font-size:1.1rem;margin-bottom:.2rem}
+.theme dd{margin:0;max-width:36rem}
+.nums{max-width:40rem;font-size:.95rem}
+.nums th{text-align:left;font-weight:400;padding:.45rem .8rem}
+.nums td{text-align:right;padding:.45rem .8rem;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.nums tr + tr{border-top:1px solid var(--band)}
+.note{font-size:.875rem;color:var(--muted);max-width:44rem}
+footer{margin-top:4rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.875rem;max-width:44rem}
+
+details.mobnav{display:none}
+@media (max-width: 900px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{display:none}
+  details.mobnav{display:block;margin:0 0 1.5rem;border:1px solid var(--rule);background:var(--surface);border-radius:3px;padding:.6rem .9rem;font-size:.9rem}
+  details.mobnav summary{cursor:pointer;font-weight:600}
+  details.mobnav a{display:block;padding:.2rem 0}
+  details.mobnav .navhead{font-family:var(--serif);font-weight:600;margin:.9rem 0 .2rem}
+  details.mobnav .navgroup{color:var(--muted);font-style:italic;margin:.5rem 0 0}
+  .two{grid-template-columns:1fr}
+  main{padding-top:1.5rem}
+}
+@media print{nav.toc,details.mobnav,.toggle{display:none}.layout{grid-template-columns:1fr}.scroll{overflow:visible}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">Infra system design reference</p>
+  <a href="#crosswalk">Crosswalk</a>
+<p class="navhead">Primitives</p>
+<p class="navgroup">Data placement</p>
+<a href="#partitioning">Partitioning</a>
+<a href="#replication">Replication</a>
+<a href="#transactions">Consistency and transactions</a>
+<a href="#durability">Durability and redundancy</a>
+<p class="navgroup">Coordination</p>
+<a href="#coordination">Coordination and leadership</a>
+<a href="#membership">Membership and failure detection</a>
+<a href="#time">Time and ordering</a>
+<p class="navgroup">Storage and query</p>
+<a href="#storage">Storage engines</a>
+<a href="#indexing">Indexing and query execution</a>
+<p class="navgroup">Flow</p>
+<a href="#delivery">Delivery semantics and idempotency</a>
+<a href="#flow">Flow control and overload</a>
+<a href="#propagation">Change propagation</a>
+<p class="navgroup">Operating</p>
+<a href="#controlplane">Control plane and data plane</a>
+<p class="navhead">Infra prompts</p>
+<a href="#p-kv">Distributed key-value store</a>
+<a href="#p-cache">Distributed cache</a>
+<a href="#p-log">Distributed log / message queue</a>
+<a href="#p-scheduler">Distributed job scheduler</a>
+<a href="#p-metrics">Metrics / monitoring system</a>
+<a href="#p-logs">Logging and tracing pipeline</a>
+<a href="#p-ratelimit">Distributed rate limiter</a>
+<a href="#p-blob">Blob / object store</a>
+<a href="#p-config">Config / feature flag service</a>
+<a href="#p-lb">Service discovery / load balancing</a>
+<a href="#p-cluster">Cluster resource scheduler</a>
+<a href="#p-lock">Distributed lock service</a>
+<a href="#p-stream">Stream processing engine</a>
+<p class="navhead">Beyond infra</p>
+<a href="#patterns">Application patterns</a>
+<a href="#themes">Staff-level themes</a>
+<a href="#numbers">Numbers for capacity math</a>
+</nav>
+<main>
+<details class="mobnav"><summary>Contents</summary><a href="#crosswalk">Crosswalk</a>
+<p class="navhead">Primitives</p>
+<p class="navgroup">Data placement</p>
+<a href="#partitioning">Partitioning</a>
+<a href="#replication">Replication</a>
+<a href="#transactions">Consistency and transactions</a>
+<a href="#durability">Durability and redundancy</a>
+<p class="navgroup">Coordination</p>
+<a href="#coordination">Coordination and leadership</a>
+<a href="#membership">Membership and failure detection</a>
+<a href="#time">Time and ordering</a>
+<p class="navgroup">Storage and query</p>
+<a href="#storage">Storage engines</a>
+<a href="#indexing">Indexing and query execution</a>
+<p class="navgroup">Flow</p>
+<a href="#delivery">Delivery semantics and idempotency</a>
+<a href="#flow">Flow control and overload</a>
+<a href="#propagation">Change propagation</a>
+<p class="navgroup">Operating</p>
+<a href="#controlplane">Control plane and data plane</a>
+<p class="navhead">Infra prompts</p>
+<a href="#p-kv">Distributed key-value store</a>
+<a href="#p-cache">Distributed cache</a>
+<a href="#p-log">Distributed log / message queue</a>
+<a href="#p-scheduler">Distributed job scheduler</a>
+<a href="#p-metrics">Metrics / monitoring system</a>
+<a href="#p-logs">Logging and tracing pipeline</a>
+<a href="#p-ratelimit">Distributed rate limiter</a>
+<a href="#p-blob">Blob / object store</a>
+<a href="#p-config">Config / feature flag service</a>
+<a href="#p-lb">Service discovery / load balancing</a>
+<a href="#p-cluster">Cluster resource scheduler</a>
+<a href="#p-lock">Distributed lock service</a>
+<a href="#p-stream">Stream processing engine</a>
+<p class="navhead">Beyond infra</p>
+<a href="#patterns">Application patterns</a>
+<a href="#themes">Staff-level themes</a>
+<a href="#numbers">Numbers for capacity math</a></details>
+
+<header class="hero">
+  <h1>Staff infra system design reference</h1>
+  <p>Infra prompts are built from a small set of distributed systems primitives. Learn each primitive once: its options, what each option buys and costs, and the questions that reveal real depth. Then practice prompts as combinations.</p>
+  <p>The crosswalk shows which primitives each prompt leans on. Select any row or column heading to jump to it.</p>
+  <div class="legend">
+    <span><span class="dot c"></span> Central to the prompt</span>
+    <span><span class="dot s"></span> Supporting</span>
+    <button class="toggle" id="hintToggle" aria-pressed="false" type="button">Hide hints in depth questions</button>
+  </div>
+</header>
+
+<h2 id="crosswalk">Crosswalk</h2>
+<p class="lede">If a prompt has a filled dot, expect the deep dive to land on that primitive.</p>
+<div class="scroll"><table class="matrix" id="matrix"><thead><tr><th class="corner" scope="col">Prompt</th><th scope="col"><a href="#partitioning" title="Partitioning"><span>Partition</span></a></th><th scope="col"><a href="#replication" title="Replication"><span>Replicate</span></a></th><th scope="col"><a href="#transactions" title="Consistency and transactions"><span>Txn</span></a></th><th scope="col"><a href="#durability" title="Durability and redundancy"><span>Durable</span></a></th><th scope="col"><a href="#coordination" title="Coordination and leadership"><span>Coord</span></a></th><th scope="col"><a href="#membership" title="Membership and failure detection"><span>Members</span></a></th><th scope="col"><a href="#time" title="Time and ordering"><span>Time</span></a></th><th scope="col"><a href="#storage" title="Storage engines"><span>Storage</span></a></th><th scope="col"><a href="#indexing" title="Indexing and query execution"><span>Index</span></a></th><th scope="col"><a href="#delivery" title="Delivery semantics and idempotency"><span>Delivery</span></a></th><th scope="col"><a href="#flow" title="Flow control and overload"><span>Flow ctl</span></a></th><th scope="col"><a href="#propagation" title="Change propagation"><span>Propagate</span></a></th><th scope="col"><a href="#controlplane" title="Control plane and data plane"><span>CP / DP</span></a></th></tr></thead><tbody><tr><th scope="row"><a href="#p-kv">Distributed key-value store</a></th><td><span class="dot c" title="Partitioning: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Replication: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Consistency and transactions: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Durability and redundancy: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Coordination and leadership: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Membership and failure detection: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Time and ordering: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Storage engines: central"></span><span class="sr">central</span></td><td></td><td></td><td><span class="dot s" title="Flow control and overload: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Control plane and data plane: supporting"></span><span class="sr">supporting</span></td></tr><tr><th scope="row"><a href="#p-cache">Distributed cache</a></th><td><span class="dot c" title="Partitioning: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Replication: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td><span class="dot s" title="Membership and failure detection: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Storage engines: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Change propagation: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Control plane and data plane: supporting"></span><span class="sr">supporting</span></td></tr><tr><th scope="row"><a href="#p-log">Distributed log / message queue</a></th><td><span class="dot c" title="Partitioning: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Replication: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Consistency and transactions: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Durability and redundancy: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Coordination and leadership: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Membership and failure detection: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Time and ordering: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Storage engines: central"></span><span class="sr">central</span></td><td></td><td><span class="dot c" title="Delivery semantics and idempotency: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Flow control and overload: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Control plane and data plane: supporting"></span><span class="sr">supporting</span></td></tr><tr><th scope="row"><a href="#p-scheduler">Distributed job scheduler</a></th><td><span class="dot s" title="Partitioning: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Consistency and transactions: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Coordination and leadership: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Membership and failure detection: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Time and ordering: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Storage engines: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Delivery semantics and idempotency: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td></td><td><span class="dot s" title="Control plane and data plane: supporting"></span><span class="sr">supporting</span></td></tr><tr><th scope="row"><a href="#p-metrics">Metrics / monitoring system</a></th><td><span class="dot c" title="Partitioning: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Replication: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Durability and redundancy: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot s" title="Time and ordering: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Storage engines: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Indexing and query execution: central"></span><span class="sr">central</span></td><td></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td></td><td><span class="dot s" title="Control plane and data plane: supporting"></span><span class="sr">supporting</span></td></tr><tr><th scope="row"><a href="#p-logs">Logging and tracing pipeline</a></th><td><span class="dot s" title="Partitioning: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot s" title="Durability and redundancy: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot s" title="Time and ordering: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Storage engines: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Indexing and query execution: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Delivery semantics and idempotency: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td></td><td></td></tr><tr><th scope="row"><a href="#p-ratelimit">Distributed rate limiter</a></th><td><span class="dot s" title="Partitioning: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Replication: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Time and ordering: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Change propagation: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Control plane and data plane: central"></span><span class="sr">central</span></td></tr><tr><th scope="row"><a href="#p-blob">Blob / object store</a></th><td><span class="dot c" title="Partitioning: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Replication: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Consistency and transactions: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Durability and redundancy: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Coordination and leadership: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Membership and failure detection: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Storage engines: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Indexing and query execution: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Flow control and overload: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Control plane and data plane: central"></span><span class="sr">central</span></td></tr><tr><th scope="row"><a href="#p-config">Config / feature flag service</a></th><td></td><td><span class="dot c" title="Replication: central"></span><span class="sr">central</span></td><td></td><td></td><td><span class="dot s" title="Coordination and leadership: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Time and ordering: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot s" title="Delivery semantics and idempotency: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Change propagation: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Control plane and data plane: central"></span><span class="sr">central</span></td></tr><tr><th scope="row"><a href="#p-lb">Service discovery / load balancing</a></th><td><span class="dot s" title="Partitioning: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Replication: supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot s" title="Coordination and leadership: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Membership and failure detection: central"></span><span class="sr">central</span></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Change propagation: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Control plane and data plane: central"></span><span class="sr">central</span></td></tr><tr><th scope="row"><a href="#p-cluster">Cluster resource scheduler</a></th><td><span class="dot s" title="Partitioning: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot s" title="Consistency and transactions: supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Coordination and leadership: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Membership and failure detection: central"></span><span class="sr">central</span></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Change propagation: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Control plane and data plane: central"></span><span class="sr">central</span></td></tr><tr><th scope="row"><a href="#p-lock">Distributed lock service</a></th><td></td><td><span class="dot c" title="Replication: central"></span><span class="sr">central</span></td><td></td><td></td><td><span class="dot c" title="Coordination and leadership: central"></span><span class="sr">central</span></td><td><span class="dot s" title="Membership and failure detection: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Time and ordering: central"></span><span class="sr">central</span></td><td></td><td></td><td></td><td><span class="dot s" title="Flow control and overload: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Change propagation: supporting"></span><span class="sr">supporting</span></td><td></td></tr><tr><th scope="row"><a href="#p-stream">Stream processing engine</a></th><td><span class="dot c" title="Partitioning: central"></span><span class="sr">central</span></td><td></td><td><span class="dot s" title="Consistency and transactions: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Durability and redundancy: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Coordination and leadership: supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Membership and failure detection: supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Time and ordering: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Storage engines: central"></span><span class="sr">central</span></td><td></td><td><span class="dot c" title="Delivery semantics and idempotency: central"></span><span class="sr">central</span></td><td><span class="dot c" title="Flow control and overload: central"></span><span class="sr">central</span></td><td></td><td></td></tr></tbody></table></div>
+
+<h2 id="primitives">Primitives</h2>
+<p class="lede">Each primitive lists its main options side by side, then the questions where interviewers separate senior answers from staff answers.</p>
+<h3 class="group">Data placement</h3>
+<section class="prim" id="partitioning">
+  <h4>Partitioning</h4>
+  <p class="question">How does data get split across machines, and how does it move when the cluster changes?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Hash mod N</th><td>hash(key) % N nodes</td><td>Trivial, even spread</td><td>Changing N reshuffles nearly every key</td><td>Almost never at scale; fine when N is truly fixed</td></tr><tr><th scope="row">Fixed logical slots</th><td>Hash into a fixed slot count (Redis Cluster uses 16,384), map slots to nodes</td><td>Rebalancing moves whole slots; small, simple routing map</td><td>Slot count chosen up front; slots can still be hot</td><td>You want predictable rebalancing and a tiny metadata footprint</td></tr><tr><th scope="row">Consistent hashing + vnodes</th><td>Nodes and keys on a ring; each node owns many virtual points</td><td>Adding a node moves roughly 1/N of keys; no central map needed</td><td>No range scans; load variance without enough vnodes</td><td>Key-value access only, peer-to-peer designs (Dynamo, Cassandra, caches)</td></tr><tr><th scope="row">Rendezvous (HRW) hashing</th><td>Each key picks the node with the highest hash(key, node)</td><td>Minimal disruption, no ring state, easy weighting</td><td>O(N) per lookup</td><td>Small node counts: cache clients, shard pickers</td></tr><tr><th scope="row">Range partitioning, dynamic splits</th><td>Sorted key ranges split on size or load; a placement service tracks them</td><td>Range scans, ordered iteration, load-based splitting</td><td>Monotonic keys hammer the last range; needs a metadata service</td><td>Scans matter (Bigtable, Spanner, CockroachDB, HBase)</td></tr><tr><th scope="row">Directory / lookup service</th><td>Explicit key or tenant to shard mapping, cached by clients</td><td>Arbitrary placement; move one big tenant on its own</td><td>Directory is a dependency and a consistency problem</td><td>Multi-tenant systems with very uneven tenants</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>A single key gets 100x normal traffic. What do you do? <span class="hint">(key splitting or salting, local caching, request coalescing, read replicas for that key)</span></li><li>Walk through adding a node while serving traffic. When does ownership flip, and what happens to in-flight writes?</li><li>Your keys are timestamps or auto-increment IDs. What breaks, and how do you fix it without losing range scans?</li><li>Secondary indexes: local per partition (scatter-gather reads) or global (separately partitioned, async updates)?</li><li>How does a client find the right partition, and what happens when its routing info is stale?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-cache">Distributed cache</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-ratelimit">Distributed rate limiter</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-cluster">Cluster resource scheduler</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="replication">
+  <h4>Replication</h4>
+  <p class="question">How many copies exist, who accepts writes, and what does a reader see?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Single leader, async</th><td>Leader acks, then ships the log to followers</td><td>Low write latency, simple</td><td>Acked writes lost on failover; stale follower reads</td><td>Loss of a few seconds of data is tolerable</td></tr><tr><th scope="row">Single leader, sync / in-sync set</th><td>Ack only after some or all replicas persist (semi-sync, Kafka ISR)</td><td>No loss of acked writes</td><td>Latency tied to slowest required replica; availability shrinks with the set</td><td>Durability matters and replicas share a region</td></tr><tr><th scope="row">Multi-leader</th><td>Several leaders (often one per region) replicate to each other</td><td>Local writes everywhere, region independence</td><td>Conflicts: LWW loses data, CRDTs constrain data types, custom merge is hard</td><td>Offline or multi-region writes where conflicts are rare or mergeable</td></tr><tr><th scope="row">Leaderless quorum</th><td>Write to W, read from R of N; R + W &gt; N</td><td>High write availability, tunable per request</td><td>Not linearizable in practice; sloppy quorums weaken guarantees; needs read repair and anti-entropy</td><td>Availability over consistency, key-value workloads</td></tr><tr><th scope="row">Consensus group per shard</th><td>Raft or Paxos log per partition; majority commit</td><td>Linearizable, automatic safe failover</td><td>Needs a majority; cross-region commits are slow; overhead per group (batch with multi-Raft)</td><td>Correctness-critical data and metadata</td></tr><tr><th scope="row">Chain replication</th><td>Writes flow head to tail; reads from the tail</td><td>Strong consistency with high read throughput</td><td>A slow node stalls the chain; needs an external config master</td><td>Read-heavy strongly consistent storage</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>The leader is partitioned but still thinks it is leader. How do you prevent split brain? <span class="hint">(terms or epochs, leases, fencing)</span></li><li>A user writes then immediately reads from a follower. How do you guarantee read-your-writes? <span class="hint">(session LSN tokens, leader reads, closed timestamps)</span></li><li>How do followers serve consistent reads without going through the leader? <span class="hint">(leader leases, read index, follower reads at a safe timestamp)</span></li><li>Where do the replicas go? Walk through AZ and region placement and what a single AZ loss does to write availability.</li><li>A replica has been down for a day. How does it catch up? <span class="hint">(snapshot plus log tail, log truncation limits)</span></li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-cache">Distributed cache</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-ratelimit">Distributed rate limiter</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-config">Config / feature flag service</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-lock">Distributed lock service</a></p>
+</section>
+<section class="prim" id="transactions">
+  <h4>Consistency and transactions</h4>
+  <p class="question">What guarantees hold when an operation spans multiple keys or partitions?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Single-partition transactions only</th><td>Design keys so atomic work lives in one partition</td><td>Fast, simple, no coordinator</td><td>Pushes cross-entity invariants into the application</td><td>You can pick partition keys around the invariants</td></tr><tr><th scope="row">Two-phase commit</th><td>Coordinator runs prepare then commit across participants</td><td>Atomic across shards</td><td>Blocks if the coordinator dies after prepare; latency adds up</td><td>Coordinator state is itself replicated via consensus (as in Spanner)</td></tr><tr><th scope="row">Percolator-style</th><td>Timestamp oracle plus locks and write intents stored with the data</td><td>Snapshot isolation over a sharded KV store</td><td>Oracle is a bottleneck and a cross-region latency problem; lock cleanup</td><td>Building transactions on Bigtable-like storage (TiDB)</td></tr><tr><th scope="row">Deterministic ordering (Calvin)</th><td>Sequence transactions first, then execute in agreed order</td><td>No 2PC aborts, high throughput</td><td>Needs read/write sets up front; awkward for interactive transactions</td><td>Stored-procedure style workloads</td></tr><tr><th scope="row">Sagas</th><td>Local transactions with compensating actions</td><td>No distributed locking, works across services</td><td>No isolation; intermediate states are visible</td><td>Long-running, cross-service business processes</td></tr><tr><th scope="row">Isolation level choice</th><td>Read committed, snapshot isolation, serializable (SSI or 2PL)</td><td>Weaker levels are faster with fewer aborts</td><td>Snapshot isolation allows write skew</td><td>Pick per workload; name the anomaly you accept</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Give an example of write skew and how your design prevents it (or why it is acceptable).</li><li>Where do transaction timestamps come from, and what happens when clocks disagree?</li><li>Which data in this system needs linearizability, and which can be eventually consistent? Justify each.</li><li>What does the client see if the coordinator crashes mid-commit?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-cluster">Cluster resource scheduler</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="durability">
+  <h4>Durability and redundancy</h4>
+  <p class="question">How do you survive disk, node, rack, and region loss at acceptable cost?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">N-way replication</th><td>Full copies (usually 3) across failure domains</td><td>Fast reads and repair, simple</td><td>3x storage</td><td>Hot data, small objects, latency-sensitive reads</td></tr><tr><th scope="row">Erasure coding</th><td>Reed-Solomon k+m, e.g. 6+3 at 1.5x overhead</td><td>Similar durability at about half the cost</td><td>CPU for encoding; repair reads many nodes; worse tail latency</td><td>Warm and cold data at large scale</td></tr><tr><th scope="row">Locally repairable codes</th><td>Extra local parity groups (Azure LRC)</td><td>Common single failures repair from few nodes</td><td>More complex; slightly more overhead than plain RS</td><td>Very large fleets where repair traffic dominates</td></tr><tr><th scope="row">Cross-region copies</th><td>Async replication or erasure coding across regions</td><td>Survives region loss</td><td>Egress cost; replication lag window</td><td>Compliance or regional disaster requirements</td></tr><tr><th scope="row">Backups and snapshots</th><td>Point-in-time copies isolated from the live system</td><td>Protects against corruption, bugs, and deletes, which replication copies faithfully</td><td>Restore time; staleness</td><td>Always, alongside replication</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Do the durability math: disk failure rate, repair time window, probability of losing enough copies inside it.</li><li>How do you handle correlated failures? <span class="hint">(placement across racks and power domains, staggered hardware batches)</span></li><li>How do you detect silent corruption? <span class="hint">(end-to-end checksums, background scrubbing)</span></li><li>A bug deletes data and it replicates everywhere in seconds. What saves you?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section><h3 class="group">Coordination</h3>
+<section class="prim" id="coordination">
+  <h4>Coordination and leadership</h4>
+  <p class="question">How do nodes agree on who owns what, safely, despite pauses and partitions?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Consensus store</th><td>etcd, ZooKeeper, or embedded Raft for leader election, membership, and config</td><td>Correct, well understood</td><td>Low write throughput; small data only; latency on every change</td><td>Metadata and control plane state, never bulk data plane traffic</td></tr><tr><th scope="row">Leases</th><td>Time-bounded ownership renewed by heartbeat</td><td>Ownership recovers automatically when holders die</td><td>Relies on bounded clock drift; a paused holder may still act</td><td>Nearly any ownership: shards, jobs, leadership</td></tr><tr><th scope="row">Fencing tokens</th><td>Monotonic token issued with each lease; storage rejects older tokens</td><td>Makes leases safe against zombies</td><td>The resource must check tokens</td><td>Whenever a stale owner could corrupt state</td></tr><tr><th scope="row">Conditional writes / CAS</th><td>Compare-and-set on a version column instead of a lock</td><td>No separate lock service</td><td>Requires store support; retries under contention</td><td>The data store already supports it (most do)</td></tr><tr><th scope="row">Redis-based locks</th><td>SET NX with TTL, or Redlock across instances</td><td>Cheap and fast</td><td>Unsafe for correctness under pauses and failover</td><td>Efficiency only, where duplicate work is harmless</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>A worker holding a lease pauses for 30 seconds of GC, the lease expires, another takes over, then the first wakes up. What prevents double writes?</li><li>What state belongs in the consensus store, and what must stay out of it?</li><li>A watch disconnects and reconnects. How does the client avoid missing events? <span class="hint">(resume from revision, relist if compacted)</span></li><li>Leadership flaps every few seconds. What causes it and how do you dampen it?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-config">Config / feature flag service</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-cluster">Cluster resource scheduler</a>, <a href="#p-lock">Distributed lock service</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="membership">
+  <h4>Membership and failure detection</h4>
+  <p class="question">How does the system decide a node is dead, and what does that decision trigger?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Central heartbeats</th><td>Nodes heartbeat to a coordinator that owns liveness</td><td>Single authoritative view</td><td>Coordinator load; one slow network path causes false positives</td><td>Hundreds to low thousands of nodes</td></tr><tr><th scope="row">Gossip (SWIM)</th><td>Random probes, indirect probes through peers, suspicion before death</td><td>Scales to large clusters, no central point</td><td>Eventual convergence; harder to reason about</td><td>Large peer-to-peer clusters (Consul, Cassandra)</td></tr><tr><th scope="row">Phi accrual detector</th><td>Suspicion level from heartbeat interval history</td><td>Adapts to network conditions</td><td>Threshold tuning</td><td>Variable latency environments</td></tr><tr><th scope="row">Lease-based liveness</th><td>A node is alive only while its lease is valid</td><td>Ties liveness to ownership safety</td><td>Conservative, slower detection</td><td>When a wrongly declared death is expensive</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>A node is slow but not dead (gray failure). How do you detect and handle it?</li><li>Declaring a node dead triggers re-replication. How do you avoid a rebalancing storm from a 60 second blip? <span class="hint">(separate routing failover from data movement, delay repair)</span></li><li>Asymmetric partition: A can reach B but B cannot reach A. What does your detector conclude?</li><li>How do new nodes join and get data without overloading existing ones?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-cache">Distributed cache</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-cluster">Cluster resource scheduler</a>, <a href="#p-lock">Distributed lock service</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="time">
+  <h4>Time and ordering</h4>
+  <p class="question">How do you order events and resolve conflicts when clocks cannot be trusted?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Wall clock + NTP</th><td>Physical timestamps</td><td>Simple, human meaningful</td><td>Skew silently breaks last-write-wins and ordering</td><td>Display and metrics, never correctness</td></tr><tr><th scope="row">Per-partition sequence</th><td>Offsets or LSNs within a partition or log</td><td>Strict order, cheap</td><td>No order across partitions</td><td>Logs, queues, replication streams</td></tr><tr><th scope="row">Lamport clocks</th><td>Counter incremented and merged on messages</td><td>Total order consistent with causality</td><td>Cannot detect concurrent updates</td><td>Tie-breaking ordering</td></tr><tr><th scope="row">Version vectors</th><td>Per-replica counters attached to values</td><td>Detects concurrent writes precisely</td><td>Grows with number of writers; siblings pushed to clients</td><td>Leaderless stores that must not lose concurrent writes</td></tr><tr><th scope="row">Hybrid logical clocks</th><td>Physical time plus logical counter</td><td>Close to wall time with causal ordering</td><td>Correctness assumes a max skew bound</td><td>Distributed SQL without special hardware (CockroachDB)</td></tr><tr><th scope="row">Timestamp oracle / TrueTime</th><td>Central monotonic service, or bounded-uncertainty clocks with commit wait</td><td>Strict global order, external consistency</td><td>Oracle is a hop and bottleneck; TrueTime needs special infrastructure</td><td>Global transactions (TiDB TSO, Spanner)</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Two writes to the same key arrive at different replicas at the same time. Which wins, and is anything lost?</li><li>What ordering guarantee does your system actually give, and to whom? Per key, per partition, global?</li><li>Event time vs processing time: how do you handle data that arrives hours late? <span class="hint">(watermarks, allowed lateness)</span></li><li>How do sequence numbers enable deduplication on retries?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-ratelimit">Distributed rate limiter</a>, <a href="#p-config">Config / feature flag service</a>, <a href="#p-lock">Distributed lock service</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section><h3 class="group">Storage and query</h3>
+<section class="prim" id="storage">
+  <h4>Storage engines</h4>
+  <p class="question">How are bytes laid out on disk given the read, write, and space profile?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">LSM tree</th><td>WAL + memtable, flushed to immutable SSTables, merged by compaction</td><td>High write throughput, good compression</td><td>Read amplification (bloom filters help); compaction stalls; tombstones</td><td>Write-heavy KV, time series, logs (RocksDB, Cassandra)</td></tr><tr><th scope="row">LSM compaction strategy</th><td>Leveled vs size-tiered vs time-window</td><td>Leveled: less space and read amp. Tiered: less write amp</td><td>Leveled: more write amp. Tiered: more space, more read amp</td><td>Leveled for read-heavy, tiered for ingest, time-window for TTL&#x27;d time series</td></tr><tr><th scope="row">B-tree</th><td>In-place pages with WAL</td><td>Predictable reads, efficient range queries</td><td>Random writes, page splits, fragmentation</td><td>Read-heavy OLTP, relational databases</td></tr><tr><th scope="row">Append-only segments + index</th><td>Sequential segment files with sparse offset index or in-memory hash index</td><td>Simple, sequential IO, page cache friendly</td><td>In-memory index must fit RAM (Bitcask); needs compaction or retention</td><td>Logs, queues, simple KV</td></tr><tr><th scope="row">Columnar</th><td>Column-oriented files with sparse indexes and heavy compression</td><td>Fast scans and aggregations, 10x+ compression</td><td>Point updates and deletes are expensive</td><td>Analytics, logs, metrics rollups (Parquet, ClickHouse)</td></tr><tr><th scope="row">Object storage as primary</th><td>Immutable files on S3-like storage with local caching</td><td>Cheap, elastic, very durable</td><td>Tens of ms latency, per-request cost, no in-place update</td><td>Cold tiers, diskless brokers, lakehouse tables</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Explain read, write, and space amplification for your engine choice. Which one hurts this workload?</li><li>How do deletes work in an LSM, and what happens with a delete-heavy workload?</li><li>How does group commit trade durability for throughput, and what does fsync cost?</li><li>When does data move from local disk to object storage, and how do reads stay fast afterward?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-cache">Distributed cache</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="indexing">
+  <h4>Indexing and query execution</h4>
+  <p class="question">How do you find data fast without the index costing more than the data?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Full inverted index</th><td>Term to posting list, per segment (Lucene)</td><td>Arbitrary fast search</td><td>Index can rival data size; costly ingest and merges</td><td>Search where query flexibility is the product</td></tr><tr><th scope="row">Label index + brute-force scan</th><td>Index only labels or streams, scan compressed chunks (Loki)</td><td>Very cheap ingest and storage</td><td>Slow broad queries</td><td>Logs mostly queried by service and time range</td></tr><tr><th scope="row">Sparse primary index + skip indexes</th><td>Sorted data, index every Nth row, min/max or bloom per block (ClickHouse)</td><td>Small index, fast filtered scans</td><td>Only fast when filters match the sort key</td><td>High-volume analytics and observability</td></tr><tr><th scope="row">Precomputed rollups</th><td>Materialized aggregates at coarser resolution</td><td>Long-range queries become cheap</td><td>Lose detail; must choose dimensions ahead of time</td><td>Dashboards over months of data</td></tr><tr><th scope="row">Scatter-gather with hedging</th><td>Fan out to shards, merge results, send backup requests to slow shards</td><td>Horizontal query scaling</td><td>Tail latency grows with fan-out</td><td>Any sharded query path</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Does the index fit in memory? Show the arithmetic.</li><li>A query fans out to 1,000 shards. What is your p99, and how do you control it? <span class="hint">(hedged requests, partial results, limits)</span></li><li>How do you stop one expensive query from taking down the query tier? <span class="hint">(cost estimation, per-tenant limits, query splitting)</span></li><li>How fresh is the index relative to ingest, and what does a user see in the gap?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-blob">Blob / object store</a></p>
+</section><h3 class="group">Flow</h3>
+<section class="prim" id="delivery">
+  <h4>Delivery semantics and idempotency</h4>
+  <p class="question">What happens to a message or job when something fails midway?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">At-most-once</th><td>Commit progress before processing</td><td>Never duplicates</td><td>Loses work on crash</td><td>Metrics samples, telemetry where loss is fine</td></tr><tr><th scope="row">At-least-once</th><td>Commit progress after processing; retry on failure</td><td>Never loses acked work</td><td>Duplicates on retry</td><td>The default; pair with idempotent consumers</td></tr><tr><th scope="row">Idempotency keys + dedup store</th><td>Record processed IDs with a TTL, check before applying</td><td>Effectively-once at the consumer</td><td>Dedup store cost; window must exceed max retry delay</td><td>External side effects: payments, emails, API calls</td></tr><tr><th scope="row">Producer IDs + sequence numbers</th><td>Broker drops repeated sequence numbers per producer</td><td>Dedup without a separate store</td><td>Only covers producer to broker</td><td>Log and queue ingestion</td></tr><tr><th scope="row">Atomic output + offset commit</th><td>Write results and consumer offset in one transaction, or checkpoint state and offsets together</td><td>Exactly-once within the system boundary</td><td>Needs transactional sink or checkpointing; ends at external side effects</td><td>Stream processing (Kafka transactions, Flink checkpoints)</td></tr><tr><th scope="row">Transactional outbox</th><td>Write event to an outbox table in the same DB transaction; relay publishes it</td><td>No dual-write inconsistency</td><td>Relay lag; at-least-once publishing</td><td>Any service that updates a DB and emits events</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Where exactly does your exactly-once guarantee stop?</li><li>A message fails every time. What happens to it and to the messages behind it? <span class="hint">(retries with backoff, DLQ, head-of-line blocking)</span></li><li>Retries reorder messages. Does anything downstream depend on order?</li><li>How long must you remember idempotency keys, and what does that cost at your volume?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-config">Config / feature flag service</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="flow">
+  <h4>Flow control and overload</h4>
+  <p class="question">What does the system do at 2x capacity, and does it recover afterward?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Backpressure</th><td>Bounded queues, credit or window-based flow control</td><td>Protects downstream, no unbounded memory</td><td>Stalls propagate upstream to producers</td><td>Pipelines where slowing down beats dropping</td></tr><tr><th scope="row">Load shedding</th><td>Reject early based on queue time, priority, or CPU; LIFO under overload</td><td>Preserves goodput for the work you accept</td><td>Some requests fail</td><td>Online serving paths</td></tr><tr><th scope="row">Admission control + quotas</th><td>Per-tenant rate and concurrency limits, weighted fair queuing</td><td>Isolation between tenants</td><td>Config burden; legitimate bursts get rejected</td><td>Any shared multi-tenant system</td></tr><tr><th scope="row">Retry discipline</th><td>Exponential backoff with jitter, retry budgets, circuit breakers</td><td>Prevents retry storms from amplifying failures</td><td>Slower recovery for individual requests</td><td>Every client of every dependency</td></tr><tr><th scope="row">Deadline propagation</th><td>Pass remaining time budget down the call chain</td><td>Stops work nobody is waiting for</td><td>Every layer must honor it</td><td>Deep call graphs</td></tr><tr><th scope="row">Autoscaling</th><td>Add capacity on load signals</td><td>Handles sustained growth</td><td>Lags spikes; cold starts; can scale into a dependency&#x27;s limits</td><td>Gradual load changes, never as the only overload defense</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>Describe a metastable failure in this design: a trigger that goes away but the overload persists. How do you break the loop?</li><li>One tenant sends 50x their normal load. What do other tenants experience?</li><li>Retries at three layers each try 3 times. What is the amplification, and how do you prevent it?</li><li>The system recovers from an outage and every client reconnects at once. What happens?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-cache">Distributed cache</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-logs">Logging and tracing pipeline</a>, <a href="#p-ratelimit">Distributed rate limiter</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-cluster">Cluster resource scheduler</a>, <a href="#p-lock">Distributed lock service</a>, <a href="#p-stream">Stream processing engine</a></p>
+</section>
+<section class="prim" id="propagation">
+  <h4>Change propagation</h4>
+  <p class="question">How do changes reach the consumers that need them, and how do consumers catch up?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Polling</th><td>Consumers periodically fetch current state or version</td><td>Simple, stateless servers, self-healing</td><td>Latency vs load tradeoff</td><td>Low change rates, many consumers, CDN-cacheable state</td></tr><tr><th scope="row">Watch / long-poll streams</th><td>Server pushes changes since a revision</td><td>Low latency, efficient</td><td>Connection state; resume after compaction needs relist</td><td>Config, service discovery, orchestration (etcd, Kubernetes)</td></tr><tr><th scope="row">Pub/sub fan-out</th><td>Publish to topic, broker delivers to subscribers</td><td>Decouples producers from consumers</td><td>Slow subscribers, delivery semantics, ordering</td><td>Many independent consumers</td></tr><tr><th scope="row">Change data capture</th><td>Tail the database log (Debezium) into a stream</td><td>No dual writes; captures every change</td><td>Schema coupling to DB internals; ops overhead</td><td>Syncing caches, search indexes, derived stores</td></tr><tr><th scope="row">Snapshot + delta</th><td>Bootstrap from a full snapshot at a version, then apply deltas</td><td>New consumers join cheaply</td><td>Must coordinate snapshot version with stream position</td><td>Any consumer that can join late or fall far behind</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>A consumer has been offline longer than the change log retention. How does it recover?</li><li>How does a cache know to invalidate, and what race lets a stale value win? <span class="hint">(set after delete, versioned sets, leases)</span></li><li>A config change pushes to 100,000 clients in seconds. How do you limit blast radius if it&#x27;s bad?</li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-cache">Distributed cache</a>, <a href="#p-ratelimit">Distributed rate limiter</a>, <a href="#p-config">Config / feature flag service</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-cluster">Cluster resource scheduler</a>, <a href="#p-lock">Distributed lock service</a></p>
+</section><h3 class="group">Operating</h3>
+<section class="prim" id="controlplane">
+  <h4>Control plane and data plane</h4>
+  <p class="question">How is the system managed, and does serving keep working when management breaks?</p>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Option</th><th scope="col">How it works</th><th scope="col">Buys you</th><th scope="col">Costs you</th><th scope="col">Reach for it when</th></tr></thead>
+    <tbody><tr><th scope="row">Imperative control</th><td>Control plane issues direct commands to nodes</td><td>Simple and immediate</td><td>Lost commands leave drift; hard to recover partial failures</td><td>Small systems, rare operations</td></tr><tr><th scope="row">Declarative reconciliation</th><td>Store desired state; controllers converge actual state in level-triggered loops</td><td>Self-healing, idempotent, resumable</td><td>Eventual; controllers can fight each other</td><td>Orchestrators, schedulers, placement (Kubernetes, Borg)</td></tr><tr><th scope="row">Push config</th><td>Control plane pushes to data plane</td><td>Fast convergence</td><td>Control plane must track every node</td><td>Moderate fleets needing fast changes</td></tr><tr><th scope="row">Pull config</th><td>Data plane fetches from a cache or edge</td><td>Scales well, data plane controls its own pace</td><td>Slower convergence</td><td>Very large fleets</td></tr><tr><th scope="row">Static stability</th><td>Data plane caches last known good state and keeps serving without the control plane</td><td>Control plane outage does not become a serving outage</td><td>Stale decisions until recovery; must bound staleness</td><td>Nearly always, for anything in the serving path</td></tr></tbody>
+  </table></div>
+  <div class="probes"><h5>Where depth is required</h5><ul><li>The control plane is down for an hour. What still works, and what degrades?</li><li>A controller bug decides to drain 80% of the fleet. What stops it? <span class="hint">(rate limits on disruptive actions, minimum healthy thresholds)</span></li><li>How do you roll out a new version of this system with mixed versions running? <span class="hint">(protocol and format compatibility)</span></li></ul></div>
+  <p class="usedin">Shows up in: <a href="#p-kv">Distributed key-value store</a>, <a href="#p-cache">Distributed cache</a>, <a href="#p-log">Distributed log / message queue</a>, <a href="#p-scheduler">Distributed job scheduler</a>, <a href="#p-metrics">Metrics / monitoring system</a>, <a href="#p-ratelimit">Distributed rate limiter</a>, <a href="#p-blob">Blob / object store</a>, <a href="#p-config">Config / feature flag service</a>, <a href="#p-lb">Service discovery / load balancing</a>, <a href="#p-cluster">Cluster resource scheduler</a></p>
+</section>
+
+<h2 id="prompts">Infra prompts</h2>
+<p class="lede">Filled chips are the primitives the interview usually turns on. Select a chip to review it.</p>
+
+<section class="prompt" id="p-kv">
+  <h4>Distributed key-value store</h4>
+  <p class="central">Choosing a consistency model, then making partitioning, replication, and the storage engine serve it.</p>
+  <div class="chips"><a class="chip c" href="#partitioning">Partitioning</a><a class="chip c" href="#replication">Replication</a><a class="chip c" href="#membership">Membership and failure detection</a><a class="chip c" href="#storage">Storage engines</a><a class="chip s" href="#transactions">Consistency and transactions</a><a class="chip s" href="#durability">Durability and redundancy</a><a class="chip s" href="#coordination">Coordination and leadership</a><a class="chip s" href="#time">Time and ordering</a><a class="chip s" href="#flow">Flow control and overload</a><a class="chip s" href="#controlplane">Control plane and data plane</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Dynamo style (leaderless, consistent hashing, quorums, hinted handoff, Merkle anti-entropy) vs Spanner style (ranges, Raft per range, placement driver, leader leases)</li><li>LWW vs version vectors for conflicts</li><li>LSM compaction strategy for the workload</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Hot key handling</li><li>Online rebalancing and range splits</li><li>Consistent reads without leader round trips</li><li>Multi-region placement</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-cache">
+  <h4>Distributed cache</h4>
+  <p class="central">It is not the source of truth, so the design is about staleness, stampedes, and failure behavior rather than durability.</p>
+  <div class="chips"><a class="chip c" href="#partitioning">Partitioning</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip c" href="#propagation">Change propagation</a><a class="chip s" href="#replication">Replication</a><a class="chip s" href="#membership">Membership and failure detection</a><a class="chip s" href="#storage">Storage engines</a><a class="chip s" href="#controlplane">Control plane and data plane</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Client-side hashing vs routing proxy (mcrouter, twemproxy)</li><li>Replicate or not</li><li>Eviction policy (LRU, LFU, TTL) and memory layout (slab allocation)</li><li>Cache-aside vs read-through vs write-through</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Thundering herd on a hot miss (leases, request coalescing)</li><li>Stale set racing an invalidation</li><li>CDC-driven invalidation</li><li>Warming a cold replacement node</li><li>Cross-region invalidation</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-log">
+  <h4>Distributed log / message queue</h4>
+  <p class="central">Durable ordered append at high throughput, with replication, consumer coordination, and defined delivery semantics.</p>
+  <div class="chips"><a class="chip c" href="#partitioning">Partitioning</a><a class="chip c" href="#replication">Replication</a><a class="chip c" href="#coordination">Coordination and leadership</a><a class="chip c" href="#storage">Storage engines</a><a class="chip c" href="#delivery">Delivery semantics and idempotency</a><a class="chip s" href="#transactions">Consistency and transactions</a><a class="chip s" href="#durability">Durability and redundancy</a><a class="chip s" href="#membership">Membership and failure detection</a><a class="chip s" href="#time">Time and ordering</a><a class="chip s" href="#flow">Flow control and overload</a><a class="chip s" href="#controlplane">Control plane and data plane</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Log (Kafka) vs broker queue (RabbitMQ, SQS): replay and ordering vs per-message ack and routing</li><li>acks and min in-sync replicas</li><li>Partition count and key choice</li><li>Local disk vs tiered vs object-storage-backed brokers</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>High watermark and unclean leader election</li><li>Consumer group rebalancing without stop-the-world</li><li>Idempotent producers and transactions</li><li>Cross-AZ replication cost</li><li>Retention and compaction (log-compacted topics)</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-scheduler">
+  <h4>Distributed job scheduler</h4>
+  <p class="central">Firing jobs on time and running each one safely despite worker death, with fairness across tenants.</p>
+  <div class="chips"><a class="chip c" href="#coordination">Coordination and leadership</a><a class="chip c" href="#membership">Membership and failure detection</a><a class="chip c" href="#time">Time and ordering</a><a class="chip c" href="#delivery">Delivery semantics and idempotency</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip s" href="#partitioning">Partitioning</a><a class="chip s" href="#transactions">Consistency and transactions</a><a class="chip s" href="#storage">Storage engines</a><a class="chip s" href="#controlplane">Control plane and data plane</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Separate scheduling (finding due jobs) from execution (workers)</li><li>Due-job index by next run time, sharded by time bucket or job ID</li><li>Claiming via conditional update with lease, or SKIP LOCKED at moderate scale</li><li>Timing wheel for precise near-term firing</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Zombie worker after lease expiry (fencing)</li><li>Missed-run policy: catch up or skip</li><li>Cron with time zones and DST</li><li>Priorities and per-tenant fairness</li><li>Long-running job heartbeats and cancellation</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-metrics">
+  <h4>Metrics / monitoring system</h4>
+  <p class="central">Cardinality, not sample rate, drives memory and index cost. Alerting must survive when everything else is broken.</p>
+  <div class="chips"><a class="chip c" href="#partitioning">Partitioning</a><a class="chip c" href="#storage">Storage engines</a><a class="chip c" href="#indexing">Indexing and query execution</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip s" href="#replication">Replication</a><a class="chip s" href="#durability">Durability and redundancy</a><a class="chip s" href="#time">Time and ordering</a><a class="chip s" href="#controlplane">Control plane and data plane</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Push vs pull (scrape) collection</li><li>Distributor hashing series to ingesters; in-memory head block with WAL; chunks flushed to object storage</li><li>Gorilla compression (delta-of-delta timestamps, XOR floats)</li><li>Rollup and downsampling schedule</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Per-tenant series limits and label hygiene</li><li>Query fan-out across ingesters and store, with splitting and caching</li><li>Replication of in-memory data before flush</li><li>Alerting path independent of dashboards</li><li>Meta-monitoring</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-logs">
+  <h4>Logging and tracing pipeline</h4>
+  <p class="central">Indexing strategy decides cost. Sampling decides which traces exist.</p>
+  <div class="chips"><a class="chip c" href="#storage">Storage engines</a><a class="chip c" href="#indexing">Indexing and query execution</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip s" href="#partitioning">Partitioning</a><a class="chip s" href="#durability">Durability and redundancy</a><a class="chip s" href="#time">Time and ordering</a><a class="chip s" href="#delivery">Delivery semantics and idempotency</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Full-text index vs label index + scan vs columnar</li><li>Agent buffering and a durable log between agents and indexers</li><li>Head-based vs tail-based trace sampling</li><li>Hot, warm, cold tiers</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Ingest spike from one noisy service</li><li>Tail sampling buffering and memory</li><li>Retention and deletion requirements (PII)</li><li>Query cost controls</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-ratelimit">
+  <h4>Distributed rate limiter</h4>
+  <p class="central">Where the counter state lives, since a synchronous network call per request is often unaffordable.</p>
+  <div class="chips"><a class="chip c" href="#flow">Flow control and overload</a><a class="chip c" href="#controlplane">Control plane and data plane</a><a class="chip s" href="#partitioning">Partitioning</a><a class="chip s" href="#replication">Replication</a><a class="chip s" href="#time">Time and ordering</a><a class="chip s" href="#propagation">Change propagation</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Token bucket vs sliding window log vs sliding window counter</li><li>Centralized store (accurate, adds latency and a dependency) vs local buckets with periodic sync or leased budget shares (fast, approximate)</li><li>Fail open vs fail closed</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Multi-dimensional limits (user, key, endpoint)</li><li>Global budgets across regions</li><li>Accuracy under node churn</li><li>Limiter outage behavior</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-blob">
+  <h4>Blob / object store</h4>
+  <p class="central">Separating metadata from data, then trading storage cost against durability and repair speed.</p>
+  <div class="chips"><a class="chip c" href="#partitioning">Partitioning</a><a class="chip c" href="#durability">Durability and redundancy</a><a class="chip c" href="#storage">Storage engines</a><a class="chip c" href="#controlplane">Control plane and data plane</a><a class="chip s" href="#replication">Replication</a><a class="chip s" href="#transactions">Consistency and transactions</a><a class="chip s" href="#coordination">Coordination and leadership</a><a class="chip s" href="#membership">Membership and failure detection</a><a class="chip s" href="#indexing">Indexing and query execution</a><a class="chip s" href="#flow">Flow control and overload</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Metadata in a sharded strongly consistent store: key to manifest of chunk IDs and placements</li><li>Pack small objects into large append-only volumes (Haystack)</li><li>Replicate hot, erasure-code cold</li><li>Multipart upload and chunking</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Durability math and repair windows</li><li>Read-after-write and listing consistency</li><li>Garbage collection of orphaned chunks</li><li>Scrubbing for bit rot</li><li>Rebalancing onto new nodes</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-config">
+  <h4>Config / feature flag service</h4>
+  <p class="central">Tiny data read constantly. The hard parts are safe distribution and surviving a total outage of the service itself.</p>
+  <div class="chips"><a class="chip c" href="#replication">Replication</a><a class="chip c" href="#propagation">Change propagation</a><a class="chip c" href="#controlplane">Control plane and data plane</a><a class="chip s" href="#coordination">Coordination and leadership</a><a class="chip s" href="#time">Time and ordering</a><a class="chip s" href="#delivery">Delivery semantics and idempotency</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Consensus-backed versioned source of truth</li><li>Streaming updates vs polling through edge caches</li><li>Local evaluation in SDKs with last-known-good persisted to disk</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Validation before publish</li><li>Staged rollout by cell or percentage</li><li>Automatic rollback on health regression</li><li>Audit and change history</li><li>Kill switches that do not depend on the flag system</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-lb">
+  <h4>Service discovery / load balancing</h4>
+  <p class="central">Keeping routing accurate as endpoints churn, and spreading load well without a single chokepoint.</p>
+  <div class="chips"><a class="chip c" href="#membership">Membership and failure detection</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip c" href="#propagation">Change propagation</a><a class="chip c" href="#controlplane">Control plane and data plane</a><a class="chip s" href="#partitioning">Partitioning</a><a class="chip s" href="#replication">Replication</a><a class="chip s" href="#coordination">Coordination and leadership</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>L4 vs L7</li><li>Central proxy vs sidecar vs client-side balancing</li><li>Maglev-style consistent hashing for connection affinity</li><li>xDS-style control plane pushing endpoints</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Active vs passive health checks, outlier ejection</li><li>Least-request vs power of two choices</li><li>Registry outage behavior (static stability)</li><li>Connection draining during deploys</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-cluster">
+  <h4>Cluster resource scheduler</h4>
+  <p class="central">Placing workloads onto machines efficiently while honoring constraints, priorities, and failures.</p>
+  <div class="chips"><a class="chip c" href="#coordination">Coordination and leadership</a><a class="chip c" href="#membership">Membership and failure detection</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip c" href="#controlplane">Control plane and data plane</a><a class="chip s" href="#partitioning">Partitioning</a><a class="chip s" href="#transactions">Consistency and transactions</a><a class="chip s" href="#propagation">Change propagation</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Monolithic vs two-level (Mesos) vs shared-state optimistic (Omega)</li><li>Filter then score placement; bin packing vs spreading</li><li>Reconciliation of desired vs actual</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Preemption and priority</li><li>Quotas and overcommit</li><li>Scheduling throughput at thousands of pods per second</li><li>Failure domain spreading</li><li>Rescheduling storms after a rack loss</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-lock">
+  <h4>Distributed lock service</h4>
+  <p class="central">Correct mutual exclusion is impossible without fencing. The design is consensus, sessions, and leases.</p>
+  <div class="chips"><a class="chip c" href="#replication">Replication</a><a class="chip c" href="#coordination">Coordination and leadership</a><a class="chip c" href="#time">Time and ordering</a><a class="chip s" href="#membership">Membership and failure detection</a><a class="chip s" href="#flow">Flow control and overload</a><a class="chip s" href="#propagation">Change propagation</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Raft or Paxos replicated state machine</li><li>Client sessions with keepalives</li><li>Coarse-grained locks (Chubby) vs fine-grained</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Fencing tokens and who checks them</li><li>Session expiry during a network blip</li><li>Watch and notification semantics</li><li>Herd effect when a popular lock releases</li></ul></div>
+  </div>
+</section>
+<section class="prompt" id="p-stream">
+  <h4>Stream processing engine</h4>
+  <p class="central">Correct stateful results over unbounded, out-of-order data, recoverable after failure.</p>
+  <div class="chips"><a class="chip c" href="#partitioning">Partitioning</a><a class="chip c" href="#time">Time and ordering</a><a class="chip c" href="#storage">Storage engines</a><a class="chip c" href="#delivery">Delivery semantics and idempotency</a><a class="chip c" href="#flow">Flow control and overload</a><a class="chip s" href="#transactions">Consistency and transactions</a><a class="chip s" href="#durability">Durability and redundancy</a><a class="chip s" href="#coordination">Coordination and leadership</a><a class="chip s" href="#membership">Membership and failure detection</a></div>
+  <div class="two">
+    <div><h5>Key decisions</h5><ul><li>Keyed partitioning of operators</li><li>Local state backend (RocksDB) with checkpoints to object storage</li><li>Barrier-based distributed snapshots (Chandy-Lamport style)</li><li>Window types and watermarks</li></ul></div>
+    <div class="probes"><h5>Where interviewers push</h5><ul><li>Late data and allowed lateness</li><li>Exactly-once sinks</li><li>Rescaling with keyed state</li><li>Backpressure propagation</li><li>Reconciling with batch recomputation</li></ul></div>
+  </div>
+</section>
+
+<h2 id="patterns">Application patterns</h2>
+<p class="lede">For when a product-style prompt shows up anyway. Most product prompts combine two or three of these.</p>
+<div class="scroll"><table class="pat">
+<thead><tr><th scope="col">Pattern</th><th scope="col">Typical prompts</th><th scope="col">Options and components</th><th scope="col">Tradeoffs</th><th scope="col">Where depth is required</th></tr></thead>
+<tbody><tr><th scope="row">Scaling reads</th><td>Feed, timeline, catalog</td><td>Cache tiers, read replicas, CDN, precomputed views; fan-out on write vs on read</td><td>Fan-out on write: fast reads, expensive for high-follower accounts. Fan-out on read: cheap writes, slow reads. Caches: speed for staleness.</td><td>Hybrid fan-out for celebrities, invalidation races, hot keys, thundering herd</td></tr><tr><th scope="row">Scaling writes</th><td>Counters, ingestion, logging</td><td>Partitioned log, LSM stores, batching, write-behind aggregation</td><td>Batching: throughput for latency and loss window. Approximate counters: cost for accuracy.</td><td>Partition key choice, hot partitions, backpressure, write amplification</td></tr><tr><th scope="row">Contention</th><td>Booking, inventory, auctions, payments</td><td>Row locks, optimistic concurrency, conditional writes, reservations with expiry, ledgers</td><td>Pessimistic: simple, contention bottleneck. Optimistic: throughput, abort storms when hot.</td><td>Fencing, double-entry ledgers, reconciliation, virtual waiting rooms</td></tr><tr><th scope="row">Multi-step workflows</th><td>Orders, payouts, onboarding</td><td>Sagas (choreography or orchestration), outbox, durable execution engines, DLQs</td><td>Choreography: loose coupling, invisible flow. Orchestration: visible and testable, central dependency.</td><td>Compensation, idempotent side effects, versioning long-running workflows</td></tr><tr><th scope="row">Real-time updates</th><td>Chat, presence, live comments, collaboration</td><td>WebSocket or SSE gateways, pub/sub, session registry, CRDTs or OT</td><td>WebSockets: bidirectional, stateful connections. SSE: simple, one-way. CRDT: offline merge, metadata overhead. OT: compact, needs a server.</td><td>Routing to the right gateway, reconnect with missed messages, ordering, presence at scale</td></tr><tr><th scope="row">Large blobs</th><td>File sync, video, images</td><td>Presigned URLs, multipart and resumable uploads, object storage, CDN, async processing</td><td>Direct-to-storage uploads: offload servers, weaker validation. Chunk dedup: storage savings, metadata complexity.</td><td>Chunking and dedup, metadata vs content consistency, transcoding pipelines</td></tr><tr><th scope="row">Proximity</th><td>Ride matching, local search, delivery</td><td>Geohash, quadtree, S2 or H3 cells, PostGIS, Redis GEO</td><td>Geohash: simple, edge effects. Quadtree: adapts to density, in-memory rebuilds. H3: uniform neighbors, library dependency.</td><td>High-frequency location updates, uneven density, matching under contention</td></tr><tr><th scope="row">Search</th><td>Typeahead, full text, catalog search</td><td>Inverted index, CDC into the index, prefix tries or precomputed completions, hybrid vector + keyword</td><td>Freshness vs indexing cost; relevance vs latency.</td><td>Index sync correctness, ranking, sharding and replicating the index</td></tr><tr><th scope="row">Stream aggregation</th><td>Ad clicks, top-K, leaderboards</td><td>Stream processors, windows, watermarks, count-min sketch, sorted sets</td><td>Exact: memory and cost. Sketches: bounded error, small memory. Streaming: fast, approximate until batch reconciles.</td><td>Late data, effectively-once counting, batch vs streaming reconciliation</td></tr><tr><th scope="row">AI serving and retrieval</th><td>RAG, LLM inference platform, agents</td><td>Chunking and embedding pipelines, vector + keyword retrieval, rerankers, inference servers with continuous batching, KV cache, GPU autoscaling</td><td>Larger models: quality for cost and latency. Batching: throughput for time to first token. Retrieval depth: recall for latency.</td><td>Token-based rate limiting, slow GPU scale-up, KV cache memory, evaluation pipelines, streaming responses</td></tr></tbody></table></div>
+
+<h2 id="themes">Staff-level themes</h2>
+<p class="lede">These cut across every prompt. Raising them unprompted, with specifics, is most of what separates staff from senior.</p>
+<dl class="themes"><div class="theme"><dt>Static stability</dt><dd>The data plane keeps serving on last known state when control plane, metadata, or config systems fail. Say explicitly what survives each dependency outage.</dd></div><div class="theme"><dt>Blast radius</dt><dd>Cells, shuffle sharding, staged rollouts, and per-tenant isolation. A bad deploy, bad config, or bad tenant should affect a bounded fraction of customers.</dd></div><div class="theme"><dt>Multi-tenancy</dt><dd>Quotas at every shared layer (queue, storage, compute, query), fair scheduling, and per-tenant observability. Most real infra is shared.</dd></div><div class="theme"><dt>Dependency loops</dt><dd>Monitoring must not depend on what it monitors. Rollback must not require the deploy system to be healthy. Check bootstrap order from a cold start.</dd></div><div class="theme"><dt>Operational lifecycle</dt><dd>Rolling upgrades with mixed versions, on-disk format migrations, adding capacity live, draining nodes. &quot;How do you upgrade this?&quot; exposes whether a design is real.</dd></div><div class="theme"><dt>Degradation modes</dt><dd>For each major component, what the user sees when it is slow, down, or wrong. Prefer partial results and stale data over hard failure where correctness allows.</dd></div><div class="theme"><dt>Capacity math that decides things</dt><dd>Use the numbers to choose: whether the index fits in RAM, whether cross-AZ replication cost is acceptable, how many partitions are needed for target throughput.</dd></div><div class="theme"><dt>Evolution</dt><dd>What a small team ships first, what breaks at 10x, and what the 100x design looks like. Name the signals that trigger each step.</dd></div><div class="theme"><dt>Cost as a design axis</dt><dd>Storage tiering, erasure coding, cross-AZ transfer, and object storage economics. Staff candidates quantify cost alongside latency and availability.</dd></div></dl>
+
+<h2 id="numbers">Numbers for capacity math</h2>
+<p class="lede">Orders of magnitude, not benchmarks. Hardware and pricing shift, so treat these as starting points for arithmetic.</p>
+<div class="scroll nums"><table><tbody><tr><th scope="row">Main memory reference</th><td>~100 ns</td></tr><tr><th scope="row">NVMe random read</th><td>~20 to 100 µs</td></tr><tr><th scope="row">NVMe sequential throughput</th><td>~2 to 7 GB/s</td></tr><tr><th scope="row">HDD seek</th><td>~5 to 10 ms</td></tr><tr><th scope="row">HDD sequential throughput</th><td>~150 to 250 MB/s</td></tr><tr><th scope="row">Round trip within an AZ</th><td>~0.2 to 0.5 ms</td></tr><tr><th scope="row">Round trip across AZs in a region</th><td>~1 to 2 ms</td></tr><tr><th scope="row">Round trip US East to US West</th><td>~60 to 80 ms</td></tr><tr><th scope="row">Object storage GET, first byte</th><td>~tens of ms</td></tr><tr><th scope="row">10 Gbps link</th><td>~1.25 GB/s</td></tr><tr><th scope="row">Seconds per day</th><td>86,400 (call it 10<sup>5</sup>)</td></tr><tr><th scope="row">1 million events per day</th><td>~12 per second</td></tr><tr><th scope="row">Gorilla-compressed metric sample</th><td>~1.4 bytes</td></tr><tr><th scope="row">Single Redis instance</th><td>~100k+ simple ops/s</td></tr><tr><th scope="row">etcd data size</th><td>keep it small: default quota 2 GB</td></tr><tr><th scope="row">Cloud cross-AZ transfer</th><td>~$0.01/GB each direction (AWS)</td></tr></tbody></table></div>
+
+<footer>Primary sources worth reading: Dynamo, Bigtable, Spanner, Raft, Chubby, Borg, Omega, Gorilla, Monarch, Scaling Memcache at Facebook, Haystack, f4, Maglev, Percolator, Calvin, and Jay Kreps' essay "The Log".</footer>
+</main>
+</div>
+<script>
+(function(){
+  var btn=document.getElementById('hintToggle');
+  function apply(on){document.body.classList.toggle('hide-hints',on);btn.setAttribute('aria-pressed',on?'true':'false');btn.textContent=on?'Show hints in depth questions':'Hide hints in depth questions';}
+  var saved=false; try{saved=localStorage.getItem('hideHints')==='1';}catch(e){}
+  apply(saved);
+  btn.addEventListener('click',function(){var on=!document.body.classList.contains('hide-hints');apply(on);try{localStorage.setItem('hideHints',on?'1':'0');}catch(e){}});
+
+  var m=document.getElementById('matrix'); if(!m) return;
+  function clear(){m.querySelectorAll('.hl').forEach(function(x){x.classList.remove('hl');});}
+  m.addEventListener('mouseover',function(ev){
+    var cell=ev.target.closest('td,th'); if(!cell||!m.contains(cell)) return;
+    clear();
+    var row=cell.parentElement, idx=Array.prototype.indexOf.call(row.children,cell);
+    if(row.parentElement.tagName==='TBODY') Array.prototype.forEach.call(row.children,function(c){c.classList.add('hl');});
+    if(idx>0) m.querySelectorAll('tr').forEach(function(r){var c=r.children[idx]; if(c) c.classList.add('hl');});
+  });
+  m.addEventListener('mouseleave',clear);
+})();
+</script>
+</body>
+</html>

@@ -1,4 +1,11 @@
 def topological_sort(graph):
+    """Topological sort: DFS each node, push to stack on exit (after
+    all its dependents are done), then reverse the stack.
+
+    Use when: ordering with dependencies (course schedule, build order)
+    on a DAG. A cycle means no valid ordering exists.
+    Time: O(V + E). Space: O(V).
+    """
     visited = set()
     stack = []
 

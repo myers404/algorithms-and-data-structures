@@ -9,24 +9,33 @@ class Node:
 
 
 def preorder(root):
+    """Preorder (root, left, right). Use to copy/serialize a tree
+    (root recreated before children). Time: O(n)."""
     if root is None:
         return []
     return [root.val] + preorder(root.left) + preorder(root.right)
 
 
 def inorder(root):
+    """Inorder (left, root, right). On a BST this yields sorted order —
+    use for "kth smallest", BST validation. Time: O(n)."""
     if root is None:
         return []
     return inorder(root.left) + [root.val] + inorder(root.right)
 
 
 def postorder(root):
+    """Postorder (left, right, root). Use when children must be
+    processed before the parent: deleting a tree, evaluating an
+    expression tree. Time: O(n)."""
     if root is None:
         return []
     return postorder(root.left) + postorder(root.right) + [root.val]
 
 
 def level_order(root):
+    """Level order (BFS via queue). Use for level-by-level processing:
+    "print tree by level", min depth, right-side view. Time: O(n)."""
     if root is None:
         return []
     order = []

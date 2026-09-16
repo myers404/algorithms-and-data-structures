@@ -1,4 +1,12 @@
 class UnionFind:
+    """Disjoint Set Union with path compression + union by rank.
+
+    Use when: connectivity/grouping queries (are these connected?
+    number of connected components), Kruskal's MST, detecting cycles
+    in an undirected graph.
+    Time: ~O(1) amortized per op (inverse Ackermann). Space: O(n).
+    """
+
     def __init__(self, n):
         self.parent = list(range(n))
         self.rank = [0] * n

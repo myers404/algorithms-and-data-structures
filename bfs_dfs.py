@@ -2,6 +2,12 @@ from collections import deque
 
 
 def bfs(graph, start):
+    """Breadth-first search: explore level by level via a queue.
+
+    Use when: shortest path in an unweighted graph, level-order
+    processing, "fewest steps/edges to reach X".
+    Time: O(V + E). Space: O(V).
+    """
     visited = {start}
     order = []
     queue = deque([start])
@@ -16,6 +22,12 @@ def bfs(graph, start):
 
 
 def dfs(graph, start, visited=None, order=None):
+    """Depth-first search: explore as far as possible via recursion/stack.
+
+    Use when: connectivity, cycle detection, path existence,
+    exhaustive exploration, or as the base for topological sort.
+    Time: O(V + E). Space: O(V) (call stack).
+    """
     if visited is None:
         visited = set()
         order = []

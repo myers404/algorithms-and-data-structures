@@ -1,4 +1,12 @@
 def quicksort(arr):
+    """Quicksort: pick a pivot, partition into less/equal/greater, recurse.
+
+    Use when: general-purpose sort, in-place variants save space over
+    mergesort. Know it for "explain quickselect" (same partition, only
+    recurse into the side containing the target index) e.g. kth largest.
+    Time: O(n log n) average, O(n^2) worst case. Space: O(n) here
+    (this version isn't in-place, for readability).
+    """
     if len(arr) <= 1:
         return arr
     pivot = arr[len(arr) // 2]

@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coding interview reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Serif:ital,wght@0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F8; --surface:#FFFFFF; --band:#E7EDF1; --ink:#17212C; --muted:#586A7B; --rule:#CAD3DA;
+  --accent:#1F6F5C; --accent-soft:#DCEEE8; --link:#1D5A86;
+  --serif:"IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --cond:"IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F151C; --surface:#161F29; --band:#1C2733; --ink:#E1E7ED; --muted:#94A5B5; --rule:#2B3947;
+    --accent:#5CC4A6; --accent-soft:#16302A; --link:#8CC2EA;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F151C; --surface:#161F29; --band:#1C2733; --ink:#E1E7ED; --muted:#94A5B5; --rule:#2B3947;
+  --accent:#5CC4A6; --accent-soft:#16302A; --link:#8CC2EA;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1rem}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+img{max-width:100%}
+
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:0;max-width:1440px;margin:0 auto}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:1.75rem 1.25rem 3rem 1.5rem;border-right:1px solid var(--rule);font-size:.875rem}
+nav.toc a{display:block;padding:.18rem 0;color:var(--ink);text-decoration:none}
+nav.toc a:hover{color:var(--accent)}
+nav.toc .navhead{font-family:var(--serif);font-weight:600;font-size:1rem;margin:1.4rem 0 .3rem}
+nav.toc .navgroup{color:var(--muted);font-style:italic;margin:.7rem 0 .1rem;font-size:.8125rem}
+.toc-title{font-family:var(--serif);font-weight:600;font-size:1.05rem;margin:0 0 1rem;line-height:1.3}
+main{padding:2.5rem clamp(1rem,4vw,3.5rem) 6rem;min-width:0}
+
+header.hero{max-width:52rem;margin-bottom:2.5rem}
+header.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,4.2vw,3.1rem);line-height:1.1;letter-spacing:-.01em;margin:0 0 1rem}
+header.hero p{max-width:40rem;margin:.5rem 0;color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:1.25rem;align-items:center;margin-top:1.25rem;font-size:.9rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:.45rem}
+.toggle{font:inherit;font-size:.875rem;background:var(--surface);color:var(--ink);border:1px solid var(--rule);padding:.35rem .75rem;border-radius:4px;cursor:pointer}
+.toggle[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+
+h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.6rem,2.8vw,2.1rem);margin:4rem 0 .5rem;line-height:1.2}
+h2 + .lede{max-width:44rem;color:var(--muted);margin:0 0 1.5rem}
+h3.group{font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.35rem;color:var(--muted);margin:3rem 0 0;padding-top:1rem;border-top:3px double var(--rule)}
+h4{font-family:var(--serif);font-weight:600;font-size:1.45rem;margin:0 0 .25rem;line-height:1.25}
+h5{font-family:var(--sans);font-weight:600;font-size:.95rem;margin:0 0 .4rem}
+
+.scroll{position:relative;overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--rule);background:var(--surface);border-radius:3px}
+table{border-collapse:collapse;width:100%}
+
+/* crosswalk */
+.matrix{font-family:var(--cond);font-size:.875rem;min-width:900px}
+.matrix thead th{vertical-align:bottom;padding:.6rem .2rem;border-bottom:2px solid var(--ink);font-weight:600;background:var(--surface)}
+.matrix thead th a{color:var(--ink);text-decoration:none;display:block}
+.matrix thead th a span{writing-mode:vertical-rl;transform:rotate(180deg);display:inline-block;white-space:nowrap;line-height:1.1}
+.matrix thead th a:hover{color:var(--accent)}
+.matrix th.corner{text-align:left;padding-left:.9rem;font-family:var(--serif);font-size:1rem;font-weight:500}
+.matrix tbody th{text-align:left;font-weight:400;padding:.45rem .9rem;white-space:nowrap;position:sticky;left:0;background:var(--surface);border-right:1px solid var(--rule)}
+.matrix tbody th a{color:var(--ink);text-decoration:none}
+.matrix tbody th a:hover{color:var(--accent)}
+.matrix td{text-align:center;padding:.35rem .25rem;border-left:1px solid var(--band);min-width:2.4rem}
+.matrix tbody tr{border-top:1px solid var(--band)}
+.matrix .hl{background:var(--accent-soft)}
+.matrix tbody th.hl{background:var(--accent-soft)}
+.dot{display:inline-block;width:.85rem;height:.85rem;border-radius:50%;vertical-align:middle}
+.dot.c{background:var(--accent)}
+.dot.s{border:2px solid var(--accent);background:transparent}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* primitives */
+.prim{margin:2.25rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.prim .question{font-family:var(--serif);font-style:italic;font-size:1.1rem;line-height:1.5;margin:0 0 1rem;max-width:44rem;color:var(--muted)}
+.opts{font-family:var(--cond);font-size:.9rem;line-height:1.4;min-width:860px}
+.opts thead th{text-align:left;font-weight:600;padding:.55rem .7rem;background:var(--band);border-bottom:1px solid var(--rule)}
+.opts tbody th{text-align:left;font-weight:600;vertical-align:top;padding:.6rem .7rem;width:15%}
+.opts td{vertical-align:top;padding:.6rem .7rem;border-left:1px solid var(--band)}
+.opts tbody tr + tr{border-top:1px solid var(--band)}
+.opts td:nth-child(4){color:var(--ink)}
+.probes{margin:1.1rem 0 0;padding:.2rem 0 .2rem 1rem;border-left:3px solid var(--accent);max-width:52rem}
+.probes ul{margin:0;padding-left:1.1rem}
+.probes li{margin:.3rem 0}
+.hint{color:var(--muted)}
+body.hide-hints .hint{display:none}
+.usedin{font-size:.875rem;color:var(--muted);margin:.9rem 0 0;max-width:52rem}
+
+/* prompts */
+.prompt{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1.25rem 1.4rem 1.35rem;margin:1.1rem 0}
+.prompt .central{margin:.2rem 0 .8rem;max-width:48rem;font-size:1.02rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:0 0 1rem}
+.chip{font-family:var(--cond);font-size:.8125rem;text-decoration:none;padding:.15rem .55rem;border-radius:999px;border:1.5px solid var(--accent);color:var(--ink)}
+.chip.c{background:var(--accent);color:var(--bg);font-weight:600}
+.chip:hover{text-decoration:underline}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.two ul{margin:0;padding-left:1.1rem}
+.two li{margin:.25rem 0}
+.prompt .probes{margin:0}
+
+/* patterns, themes, numbers */
+.pat{font-family:var(--cond);font-size:.9rem;line-height:1.4;min-width:900px}
+.pat thead th{text-align:left;font-weight:600;padding:.55rem .7rem;background:var(--band)}
+.pat tbody th{text-align:left;vertical-align:top;padding:.6rem .7rem;font-weight:600;width:13%}
+.pat td{vertical-align:top;padding:.6rem .7rem;border-left:1px solid var(--band)}
+.pat tbody tr + tr{border-top:1px solid var(--band)}
+dl.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:0 2rem;margin:0}
+.theme{padding:.9rem 0;border-top:1px solid var(--rule)}
+.theme dt{font-family:var(--serif);font-weight:600;font-size:1.1rem;margin-bottom:.2rem}
+.theme dd{margin:0;max-width:36rem}
+.nums{max-width:40rem;font-size:.95rem}
+.nums th{text-align:left;font-weight:400;padding:.45rem .8rem}
+.nums td{text-align:right;padding:.45rem .8rem;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.nums tr + tr{border-top:1px solid var(--band)}
+.note{font-size:.875rem;color:var(--muted);max-width:44rem}
+footer{margin-top:4rem;padding-top:1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.875rem;max-width:44rem}
+
+details.mobnav{display:none}
+@media (max-width: 900px){
+  .layout{grid-template-columns:1fr}
+  nav.toc{display:none}
+  details.mobnav{display:block;margin:0 0 1.5rem;border:1px solid var(--rule);background:var(--surface);border-radius:3px;padding:.6rem .9rem;font-size:.9rem}
+  details.mobnav summary{cursor:pointer;font-weight:600}
+  details.mobnav a{display:block;padding:.2rem 0}
+  details.mobnav .navhead{font-family:var(--serif);font-weight:600;margin:.9rem 0 .2rem}
+  details.mobnav .navgroup{color:var(--muted);font-style:italic;margin:.5rem 0 0}
+  .two{grid-template-columns:1fr}
+  main{padding-top:1.5rem}
+}
+@media print{nav.toc,details.mobnav,.toggle{display:none}.layout{grid-template-columns:1fr}.scroll{overflow:visible}}
+
+:root{--mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace; --code-bg:#EEF2F4; --kw:#7A3E9D; --st:#2F7A3B; --cm:#6B7B8A; --fn:#1D5A86; --nu:#A0522D}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--code-bg:#111A22; --kw:#C79BEA; --st:#94D29E; --cm:#7F90A0; --fn:#8CC2EA; --nu:#E6A57A}}
+:root[data-theme="dark"]{--code-bg:#111A22; --kw:#C79BEA; --st:#94D29E; --cm:#7F90A0; --fn:#8CC2EA; --nu:#E6A57A}
+.tech{margin:2.25rem 0 0;padding-top:1.5rem;border-top:1px solid var(--rule)}
+.tech .question{font-family:var(--serif);font-style:italic;font-size:1.1rem;line-height:1.5;margin:0 0 1rem;max-width:44rem;color:var(--muted)}
+.signals{margin:0 0 1.1rem;max-width:60rem}
+.signals ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.4rem}
+.signals li{background:var(--accent-soft);border-radius:3px;padding:.2rem .6rem;font-size:.9rem}
+.opts td.cx{white-space:nowrap;font-variant-numeric:tabular-nums}
+.codewrap{margin:1.1rem 0 0;max-width:52rem}
+pre.code{margin:0;background:var(--code-bg);border:1px solid var(--rule);border-radius:3px;padding:.9rem 1rem;overflow-x:auto;font-family:var(--mono);font-size:.84rem;line-height:1.55;tab-size:4}
+pre.code .kw{color:var(--kw);font-weight:600}
+pre.code .st{color:var(--st)}
+pre.code .cm{color:var(--cm);font-style:italic}
+pre.code .fn{color:var(--fn);font-weight:600}
+pre.code .nu{color:var(--nu)}
+body.hide-code .codewrap{display:none}
+.pitfalls{margin:1.1rem 0 0;padding:.2rem 0 .2rem 1rem;border-left:3px solid var(--accent);max-width:52rem}
+.pitfalls ul{margin:0;padding-left:1.1rem}
+.pitfalls li{margin:.3rem 0}
+.matrix tbody th{font-weight:400}
+.ref{font-size:.95rem;min-width:560px}
+.ref thead th,.wide thead th{text-align:left;font-weight:600;padding:.55rem .8rem;background:var(--band)}
+.ref tbody th,.wide tbody th{text-align:left;font-weight:600;padding:.5rem .8rem;vertical-align:top}
+.ref td,.wide td{padding:.5rem .8rem;vertical-align:top;border-left:1px solid var(--band)}
+.ref tbody tr + tr,.wide tbody tr + tr{border-top:1px solid var(--band)}
+.ref td:nth-child(2){white-space:nowrap}
+.wide{font-family:var(--cond);font-size:.9rem;line-height:1.4;min-width:860px}
+.wide tbody th{width:18%}
+.refwrap{max-width:60rem}
+.toggles{display:flex;gap:.5rem;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="Contents">
+  <p class="toc-title">Coding interview reference</p>
+  <a href="#crosswalk">Crosswalk</a>
+<p class="navhead">Techniques</p>
+<p class="navgroup">Sequences and lookups</p>
+<a href="#hashing">Hashing and counting</a>
+<a href="#twoptr">Two pointers</a>
+<a href="#window">Sliding window</a>
+<a href="#prefix">Prefix sums and difference arrays</a>
+<a href="#binsearch">Binary search</a>
+<a href="#intervals">Intervals, sorting, and sweep line</a>
+<p class="navgroup">Ordered and prioritized</p>
+<a href="#monostack">Monotonic stack and deque</a>
+<a href="#heap">Heaps and top-K</a>
+<p class="navgroup">Linked and hierarchical</p>
+<a href="#linkedlist">Linked list manipulation</a>
+<a href="#tree">Tree traversal and BSTs</a>
+<a href="#trie">Tries</a>
+<p class="navgroup">Graphs</p>
+<a href="#graph">Graph traversal</a>
+<a href="#topo">Topological sort</a>
+<a href="#dsu">Union-find</a>
+<a href="#shortest">Weighted shortest paths</a>
+<p class="navgroup">Search and optimization</p>
+<a href="#backtrack">Backtracking</a>
+<a href="#dp">Dynamic programming</a>
+<a href="#greedy">Greedy</a>
+<a href="#bits">Bit manipulation</a>
+<p class="navhead">Reference</p>
+<a href="#constraints">Input size to complexity</a>
+<a href="#python">Python costs that bite</a>
+<a href="#edges">Edge cases</a>
+<p class="navhead">Practical rounds</p>
+<a href="#lld">Low-level design</a>
+<a href="#concurrency">Concurrency</a>
+<a href="#review">Code review and debugging</a>
+</nav>
+<main>
+<details class="mobnav"><summary>Contents</summary><a href="#crosswalk">Crosswalk</a>
+<p class="navhead">Techniques</p>
+<p class="navgroup">Sequences and lookups</p>
+<a href="#hashing">Hashing and counting</a>
+<a href="#twoptr">Two pointers</a>
+<a href="#window">Sliding window</a>
+<a href="#prefix">Prefix sums and difference arrays</a>
+<a href="#binsearch">Binary search</a>
+<a href="#intervals">Intervals, sorting, and sweep line</a>
+<p class="navgroup">Ordered and prioritized</p>
+<a href="#monostack">Monotonic stack and deque</a>
+<a href="#heap">Heaps and top-K</a>
+<p class="navgroup">Linked and hierarchical</p>
+<a href="#linkedlist">Linked list manipulation</a>
+<a href="#tree">Tree traversal and BSTs</a>
+<a href="#trie">Tries</a>
+<p class="navgroup">Graphs</p>
+<a href="#graph">Graph traversal</a>
+<a href="#topo">Topological sort</a>
+<a href="#dsu">Union-find</a>
+<a href="#shortest">Weighted shortest paths</a>
+<p class="navgroup">Search and optimization</p>
+<a href="#backtrack">Backtracking</a>
+<a href="#dp">Dynamic programming</a>
+<a href="#greedy">Greedy</a>
+<a href="#bits">Bit manipulation</a>
+<p class="navhead">Reference</p>
+<a href="#constraints">Input size to complexity</a>
+<a href="#python">Python costs that bite</a>
+<a href="#edges">Edge cases</a>
+<p class="navhead">Practical rounds</p>
+<a href="#lld">Low-level design</a>
+<a href="#concurrency">Concurrency</a>
+<a href="#review">Code review and debugging</a></details>
+
+<header class="hero">
+  <h1>Coding interview reference</h1>
+  <p>Most coding problems are one or two techniques in disguise. For each technique: the wording that signals it, its variants with time and space costs, a tested Python template, and the bugs and follow-ups that trip people up.</p>
+  <p>The crosswalk maps well-known problems to techniques. Use it to practice recognition: cover the row, name the technique, then check.</p>
+  <div class="legend">
+    <span><span class="dot c"></span> Core technique</span>
+    <span><span class="dot s"></span> Alternative or supporting</span>
+    <span class="toggles">
+      <button class="toggle" id="hintToggle" aria-pressed="false" type="button">Hide hints</button>
+      <button class="toggle" id="codeToggle" aria-pressed="false" type="button">Hide templates</button>
+    </span>
+  </div>
+</header>
+
+<h2 id="crosswalk">Crosswalk</h2>
+<p class="lede">Hollow dots are valid alternate approaches or pieces of the solution. Select a column heading to jump to that technique.</p>
+<div class="scroll"><table class="matrix" id="matrix"><thead><tr><th class="corner" scope="col">Problem</th><th scope="col"><a href="#hashing" title="Hashing and counting"><span>Hashing</span></a></th><th scope="col"><a href="#twoptr" title="Two pointers"><span>Two pointers</span></a></th><th scope="col"><a href="#window" title="Sliding window"><span>Sliding window</span></a></th><th scope="col"><a href="#prefix" title="Prefix sums and difference arrays"><span>Prefix sums</span></a></th><th scope="col"><a href="#binsearch" title="Binary search"><span>Binary search</span></a></th><th scope="col"><a href="#intervals" title="Intervals, sorting, and sweep line"><span>Intervals</span></a></th><th scope="col"><a href="#monostack" title="Monotonic stack and deque"><span>Monotonic stack</span></a></th><th scope="col"><a href="#heap" title="Heaps and top-K"><span>Heap</span></a></th><th scope="col"><a href="#linkedlist" title="Linked list manipulation"><span>Linked list</span></a></th><th scope="col"><a href="#tree" title="Tree traversal and BSTs"><span>Trees</span></a></th><th scope="col"><a href="#trie" title="Tries"><span>Trie</span></a></th><th scope="col"><a href="#graph" title="Graph traversal"><span>BFS / DFS</span></a></th><th scope="col"><a href="#topo" title="Topological sort"><span>Topo sort</span></a></th><th scope="col"><a href="#dsu" title="Union-find"><span>Union-find</span></a></th><th scope="col"><a href="#shortest" title="Weighted shortest paths"><span>Shortest path</span></a></th><th scope="col"><a href="#backtrack" title="Backtracking"><span>Backtracking</span></a></th><th scope="col"><a href="#dp" title="Dynamic programming"><span>DP</span></a></th><th scope="col"><a href="#greedy" title="Greedy"><span>Greedy</span></a></th><th scope="col"><a href="#bits" title="Bit manipulation"><span>Bits</span></a></th></tr></thead><tbody><tr><th scope="row">Two sum</th><td><span class="dot c" title="Hashing and counting: core"></span><span class="sr">core</span></td><td><span class="dot s" title="Two pointers: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">3Sum</th><td></td><td><span class="dot c" title="Two pointers: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td><span class="dot s" title="Intervals, sorting, and sweep line: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Longest consecutive sequence</th><td><span class="dot c" title="Hashing and counting: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Union-find: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Longest substring without repeating characters</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Sliding window: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Minimum window substring</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Sliding window: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Subarray sum equals K</th><td><span class="dot c" title="Hashing and counting: core"></span><span class="sr">core</span></td><td></td><td></td><td><span class="dot c" title="Prefix sums and difference arrays: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Product of array except self</th><td></td><td></td><td></td><td><span class="dot c" title="Prefix sums and difference arrays: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Trapping rain water</th><td></td><td><span class="dot c" title="Two pointers: core"></span><span class="sr">core</span></td><td></td><td><span class="dot s" title="Prefix sums and difference arrays: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot s" title="Monotonic stack and deque: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Search in rotated sorted array</th><td></td><td></td><td></td><td></td><td><span class="dot c" title="Binary search: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Split array largest sum</th><td></td><td></td><td></td><td></td><td><span class="dot c" title="Binary search: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Dynamic programming: alternative or supporting"></span><span class="sr">supporting</span></td><td><span class="dot s" title="Greedy: alternative or supporting"></span><span class="sr">supporting</span></td><td></td></tr><tr><th scope="row">Median of two sorted arrays</th><td></td><td></td><td></td><td></td><td><span class="dot c" title="Binary search: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Time-based key-value store</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td><span class="dot c" title="Binary search: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Merge intervals</th><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Intervals, sorting, and sweep line: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Meeting rooms II</th><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Intervals, sorting, and sweep line: core"></span><span class="sr">core</span></td><td></td><td><span class="dot s" title="Heaps and top-K: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Daily temperatures</th><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Monotonic stack and deque: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Largest rectangle in histogram</th><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Monotonic stack and deque: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Sliding window maximum</th><td></td><td></td><td><span class="dot s" title="Sliding window: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td><span class="dot c" title="Monotonic stack and deque: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Top K frequent elements</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Heaps and top-K: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Find median from data stream</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Heaps and top-K: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Merge K sorted lists</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Heaps and top-K: core"></span><span class="sr">core</span></td><td><span class="dot s" title="Linked list manipulation: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">LRU cache</th><td><span class="dot c" title="Hashing and counting: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Linked list manipulation: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Reverse nodes in K-group</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Linked list manipulation: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Binary tree maximum path sum</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Tree traversal and BSTs: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Dynamic programming: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td></tr><tr><th scope="row">Lowest common ancestor</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Tree traversal and BSTs: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Serialize and deserialize binary tree</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Tree traversal and BSTs: core"></span><span class="sr">core</span></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Word search II</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Tries: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Backtracking: core"></span><span class="sr">core</span></td><td></td><td></td><td></td></tr><tr><th scope="row">Number of islands</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Graph traversal: core"></span><span class="sr">core</span></td><td></td><td><span class="dot s" title="Union-find: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Rotting oranges</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Graph traversal: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Word ladder</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Graph traversal: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Course schedule II</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Topological sort: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Alien dictionary</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td><span class="dot c" title="Topological sort: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Accounts merge</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td><span class="dot c" title="Union-find: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Network delay time</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Heaps and top-K: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Weighted shortest paths: core"></span><span class="sr">core</span></td><td></td><td></td><td></td><td></td></tr><tr><th scope="row">Cheapest flights within K stops</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td><span class="dot c" title="Weighted shortest paths: core"></span><span class="sr">core</span></td><td></td><td><span class="dot s" title="Dynamic programming: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td></tr><tr><th scope="row">N-Queens</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Backtracking: core"></span><span class="sr">core</span></td><td></td><td></td><td><span class="dot s" title="Bit manipulation: alternative or supporting"></span><span class="sr">supporting</span></td></tr><tr><th scope="row">Coin change</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Dynamic programming: core"></span><span class="sr">core</span></td><td></td><td></td></tr><tr><th scope="row">Edit distance</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Dynamic programming: core"></span><span class="sr">core</span></td><td></td><td></td></tr><tr><th scope="row">Longest increasing subsequence</th><td></td><td></td><td></td><td></td><td><span class="dot s" title="Binary search: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Dynamic programming: core"></span><span class="sr">core</span></td><td></td><td></td></tr><tr><th scope="row">Jump game II</th><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Graph traversal: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Greedy: core"></span><span class="sr">core</span></td><td></td></tr><tr><th scope="row">Task scheduler</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot s" title="Heaps and top-K: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Greedy: core"></span><span class="sr">core</span></td><td></td></tr><tr><th scope="row">Single number</th><td><span class="dot s" title="Hashing and counting: alternative or supporting"></span><span class="sr">supporting</span></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td><span class="dot c" title="Bit manipulation: core"></span><span class="sr">core</span></td></tr></tbody></table></div>
+
+<h2 id="techniques">Techniques</h2>
+<p class="lede">Templates are written for clarity and were run against test cases. Imports assumed: heapq, bisect_left, Counter, defaultdict, deque, reduce, accumulate, xor.</p>
+<h3 class="group">Sequences and lookups</h3>
+<section class="tech" id="hashing">
+  <h4>Hashing and counting</h4>
+  <p class="question">Trade memory for constant-time lookup of what you have already seen.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Find a pair or complement in unsorted input</li><li>Have I seen this before?</li><li>Count occurrences, find duplicates or the majority</li><li>Group items that are equivalent</li><li>O(n) required and sorting is not allowed</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Complement lookup</th><td>Store seen values, check for target minus current</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Pair sums and differences on unsorted input</td></tr><tr><th scope="row">Frequency counting</th><td>Counter or array of 26 for letters</td><td class="cx">O(n)</td><td class="cx">O(k) distinct</td><td>Anagrams, majority, first unique, top-K prep</td></tr><tr><th scope="row">Canonical key grouping</th><td>Map each item to a normalized key (sorted chars, count tuple, pattern)</td><td class="cx">O(n · m log m) or O(n · m)</td><td class="cx">O(n · m)</td><td>Group anagrams, isomorphic strings, shifted strings</td></tr><tr><th scope="row">Set membership</th><td>Dedupe, or scan only from sequence starts</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Longest consecutive sequence, contains duplicate</td></tr><tr><th scope="row">Value to index + array</th><td>Swap the removed element with the last, update its index</td><td class="cx">O(1) average per op</td><td class="cx">O(n)</td><td>Insert, delete, and get random in O(1)</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">two_sum</span>(nums, target):
+    index = {}                      <span class="cm"># value -&gt; index seen so far</span>
+    <span class="kw">for</span> i, x <span class="kw">in</span> enumerate(nums):
+        <span class="kw">if</span> target - x <span class="kw">in</span> index:     <span class="cm"># check before insert: no self-pairing</span>
+            <span class="kw">return</span> index[target - x], i
+        index[x] = i
+    <span class="kw">return</span> <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">group_anagrams</span>(words):
+    groups = defaultdict(list)
+    <span class="kw">for</span> w <span class="kw">in</span> words:
+        groups[tuple(sorted(w))].append(w)   <span class="cm"># canonical key</span>
+    <span class="kw">return</span> list(groups.values())</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Pairing an element with itself in two-sum <span class="hint">(check before inserting)</span></li><li>Using a list as a dict key <span class="hint">(convert to tuple)</span></li><li>Longest consecutive sequence becoming O(n²) <span class="hint">(only start counting where x − 1 is absent)</span></li><li>Mutating a dict while iterating over it</li><li>Stating O(1) without the caveat <span class="hint">(average case; adversarial collisions degrade)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Two sum, Longest consecutive sequence, Longest substring without repeating characters, Minimum window substring, Subarray sum equals K, Time-based key-value store, Top K frequent elements, LRU cache, Word ladder, Accounts merge, Task scheduler, Single number</p>
+</section>
+<section class="tech" id="twoptr">
+  <h4>Two pointers</h4>
+  <p class="question">Walk two indices through a sequence so each step discards candidates instead of re-checking them.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Sorted array, or sorting is allowed</li><li>In place with O(1) extra space</li><li>Pairs or triplets meeting a condition</li><li>Palindromes</li><li>Merge or compare two sorted sequences</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Opposite ends</th><td>lo from left, hi from right; move the side that can improve</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Pair sum on sorted input, container with most water, trapping rain water</td></tr><tr><th scope="row">Anchor + opposite ends</th><td>Fix one element, two-pointer the rest</td><td class="cx">O(n²)</td><td class="cx">O(1) plus sort</td><td>3Sum, 3Sum closest, 4Sum (O(n³))</td></tr><tr><th scope="row">Read / write pointers</th><td>Fast pointer scans, slow pointer writes kept items</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Remove duplicates in place, move zeros, filter</td></tr><tr><th scope="row">Three-way partition</th><td>low, mid, high regions (Dutch national flag)</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Sort colors, partition around a pivot</td></tr><tr><th scope="row">Across two sequences</th><td>One pointer per sequence, advance the smaller</td><td class="cx">O(n + m)</td><td class="cx">O(1)</td><td>Merge sorted arrays, is-subsequence, intersections</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">three_sum</span>(nums):
+    nums.sort()
+    out = []
+    <span class="kw">for</span> i <span class="kw">in</span> range(len(nums) - <span class="nu">2</span>):
+        <span class="kw">if</span> i &gt; <span class="nu">0</span> <span class="kw">and</span> nums[i] == nums[i - <span class="nu">1</span>]:
+            <span class="kw">continue</span>                          <span class="cm"># skip duplicate anchors</span>
+        lo, hi = i + <span class="nu">1</span>, len(nums) - <span class="nu">1</span>
+        <span class="kw">while</span> lo &lt; hi:
+            s = nums[i] + nums[lo] + nums[hi]
+            <span class="kw">if</span> s &lt; <span class="nu">0</span>:
+                lo += <span class="nu">1</span>
+            <span class="kw">elif</span> s &gt; <span class="nu">0</span>:
+                hi -= <span class="nu">1</span>
+            <span class="kw">else</span>:
+                out.append([nums[i], nums[lo], nums[hi]])
+                lo += <span class="nu">1</span>
+                <span class="kw">while</span> lo &lt; hi <span class="kw">and</span> nums[lo] == nums[lo - <span class="nu">1</span>]:
+                    lo += <span class="nu">1</span>                   <span class="cm"># skip duplicate middles</span>
+    <span class="kw">return</span> out</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Duplicate triplets in 3Sum <span class="hint">(skip equal anchors and equal middles after a match)</span></li><li>lo &lt; hi vs lo &lt;= hi <span class="hint">(can the same index be used twice?)</span></li><li>Trapping rain water: why moving the smaller side is safe <span class="hint">(the smaller max bounds the water there)</span></li><li>Forgetting sorting costs O(n log n) and may lose original indices</li></ul></div>
+  <p class="usedin">In the crosswalk: Two sum, 3Sum, Trapping rain water</p>
+</section>
+<section class="tech" id="window">
+  <h4>Sliding window</h4>
+  <p class="question">Maintain a contiguous range incrementally instead of recomputing every subarray.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Contiguous subarray or substring</li><li>Longest, shortest, or at most K</li><li>Every window of size K</li><li>Counts of characters inside a range</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Fixed size K</th><td>Add right; once size exceeds K, remove left</td><td class="cx">O(n)</td><td class="cx">O(1) or O(alphabet)</td><td>Max sum of size K, permutation in string</td></tr><tr><th scope="row">Variable, longest valid</th><td>Expand right; shrink while invalid; record after shrinking</td><td class="cx">O(n)</td><td class="cx">O(alphabet)</td><td>Longest substring without repeats, at most K distinct</td></tr><tr><th scope="row">Variable, shortest valid</th><td>Expand until valid; shrink while still valid, recording each time</td><td class="cx">O(n)</td><td class="cx">O(alphabet)</td><td>Minimum window substring, minimum size subarray sum</td></tr><tr><th scope="row">Exactly K via at most</th><td>count(at most K) − count(at most K − 1)</td><td class="cx">O(n)</td><td class="cx">O(alphabet)</td><td>Subarrays with exactly K distinct values</td></tr><tr><th scope="row">Window with max or min</th><td>Pair the window with a monotonic deque</td><td class="cx">O(n)</td><td class="cx">O(K)</td><td>Sliding window maximum, longest subarray with bounded range</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">longest_without_repeats</span>(s):
+    counts = defaultdict(int)
+    best = left = <span class="nu">0</span>
+    <span class="kw">for</span> right, ch <span class="kw">in</span> enumerate(s):
+        counts[ch] += <span class="nu">1</span>
+        <span class="kw">while</span> counts[ch] &gt; <span class="nu">1</span>:                 <span class="cm"># invalid: shrink from left</span>
+            counts[s[left]] -= <span class="nu">1</span>
+            left += <span class="nu">1</span>
+        best = max(best, right - left + <span class="nu">1</span>)    <span class="cm"># longest: record after shrink</span>
+    <span class="kw">return</span> best
+
+<span class="kw">def</span> <span class="fn">shortest_with_sum_at_least</span>(nums, target):   <span class="cm"># non-negative nums</span>
+    best, total, left = float(<span class="st">&quot;inf&quot;</span>), <span class="nu">0</span>, <span class="nu">0</span>
+    <span class="kw">for</span> right, x <span class="kw">in</span> enumerate(nums):
+        total += x
+        <span class="kw">while</span> total &gt;= target:                <span class="cm"># shortest: record while valid</span>
+            best = min(best, right - left + <span class="nu">1</span>)
+            total -= nums[left]
+            left += <span class="nu">1</span>
+    <span class="kw">return</span> <span class="nu">0</span> <span class="kw">if</span> best == float(<span class="st">&quot;inf&quot;</span>) <span class="kw">else</span> best</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Applying it when validity is not monotonic in window size <span class="hint">(negative numbers break sum windows: use prefix sums)</span></li><li>Comparing whole count maps every step <span class="hint">(track a &#x27;satisfied&#x27; counter instead)</span></li><li>Recording the answer at the wrong moment <span class="hint">(after shrinking for longest, during shrinking for shortest)</span></li><li>Off-by-one on window length <span class="hint">(right − left + 1)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Longest substring without repeating characters, Minimum window substring, Sliding window maximum</p>
+</section>
+<section class="tech" id="prefix">
+  <h4>Prefix sums and difference arrays</h4>
+  <p class="question">Precompute cumulative values so any range becomes a subtraction.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Sum or count over a subarray</li><li>Many range queries</li><li>Subarray sums with negative numbers</li><li>Many range increments then one read</li><li>Product of all except self</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">1D prefix</th><td>pre[i + 1] = pre[i] + a[i]; range sum = pre[r + 1] − pre[l]</td><td class="cx">O(n) build, O(1) query</td><td class="cx">O(n)</td><td>Immutable range sum</td></tr><tr><th scope="row">Prefix + hash map</th><td>Look up earlier prefixes equal to current − k (or same remainder mod k)</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Count subarrays summing to K, divisible by K, longest balanced subarray</td></tr><tr><th scope="row">2D prefix</th><td>Inclusion-exclusion over a rectangle</td><td class="cx">O(mn) build, O(1) query</td><td class="cx">O(mn)</td><td>Matrix region sums</td></tr><tr><th scope="row">Difference array</th><td>+d at start, −d after end, then accumulate</td><td class="cx">O(1) per update, O(n) to read</td><td class="cx">O(n)</td><td>Car pooling, flight bookings, range increments</td></tr><tr><th scope="row">Left and right passes</th><td>Accumulate from both sides, combine</td><td class="cx">O(n)</td><td class="cx">O(1) extra</td><td>Product except self, candy distribution</td></tr><tr><th scope="row">Fenwick or segment tree</th><td>Tree over prefix ranges for interleaved updates and queries</td><td class="cx">O(log n) each</td><td class="cx">O(n)</td><td>Mutable range sums, count of smaller numbers after self</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">count_subarrays_with_sum</span>(nums, k):
+    seen = defaultdict(int)
+    seen[<span class="nu">0</span>] = <span class="nu">1</span>                  <span class="cm"># empty prefix</span>
+    total = count = <span class="nu">0</span>
+    <span class="kw">for</span> x <span class="kw">in</span> nums:
+        total += x
+        count += seen[total - k]
+        seen[total] += <span class="nu">1</span>
+    <span class="kw">return</span> count
+
+<span class="kw">def</span> <span class="fn">apply_range_updates</span>(n, updates):   <span class="cm"># (start, end_inclusive, delta)</span>
+    diff = [<span class="nu">0</span>] * (n + <span class="nu">1</span>)
+    <span class="kw">for</span> lo, hi, d <span class="kw">in</span> updates:
+        diff[lo] += d
+        diff[hi + <span class="nu">1</span>] -= d
+    <span class="kw">return</span> list(accumulate(diff[:-<span class="nu">1</span>]))</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Forgetting to seed the map with prefix 0 <span class="hint">(misses subarrays starting at index 0)</span></li><li>Longest subarray: store the first index of each prefix, count problems: store frequency</li><li>Off-by-one between length-n and length-n+1 prefix arrays</li><li>Choosing plain prefix sums when updates interleave with queries <span class="hint">(use Fenwick)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Subarray sum equals K, Product of array except self, Trapping rain water</p>
+</section>
+<section class="tech" id="binsearch">
+  <h4>Binary search</h4>
+  <p class="question">Halve the search space using any monotonic yes/no question, not just sorted arrays.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Sorted input</li><li>Minimum X such that, or maximum X such that</li><li>Minimize the maximum or maximize the minimum</li><li>O(log n) required</li><li>Huge answer range with a cheap feasibility check</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Lower or upper bound</th><td>First index where a[i] &gt;= x (bisect_left) or &gt; x (bisect_right)</td><td class="cx">O(log n)</td><td class="cx">O(1)</td><td>First and last position, insert position, counting in ranges</td></tr><tr><th scope="row">On the answer</th><td>Search the value range with a monotonic feasible(x) check</td><td class="cx">O(log R · check)</td><td class="cx">O(1)</td><td>Ship within D days, Koko bananas, split array largest sum</td></tr><tr><th scope="row">Rotated or unimodal</th><td>Compare mid with an endpoint to find the sorted half</td><td class="cx">O(log n)</td><td class="cx">O(1)</td><td>Search rotated array, find minimum, peak element</td></tr><tr><th scope="row">Partition two arrays</th><td>Binary search a cut in the smaller array</td><td class="cx">O(log min(m, n))</td><td class="cx">O(1)</td><td>Median of two sorted arrays, kth of two arrays</td></tr><tr><th scope="row">Over time-indexed data</th><td>bisect on per-key sorted timestamps</td><td class="cx">O(log n) per query</td><td class="cx">O(n)</td><td>Time-based key-value store, snapshot arrays</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">first_true</span>(lo, hi, ok):
+    <span class="st">&quot;&quot;&quot;Smallest x in [lo, hi) with ok(x) True. ok is False...False True...True.</span>
+<span class="st">    Returns hi if no such x.&quot;&quot;&quot;</span>
+    <span class="kw">while</span> lo &lt; hi:
+        mid = (lo + hi) // <span class="nu">2</span>
+        <span class="kw">if</span> ok(mid):
+            hi = mid
+        <span class="kw">else</span>:
+            lo = mid + <span class="nu">1</span>
+    <span class="kw">return</span> lo
+
+<span class="kw">def</span> <span class="fn">min_eating_speed</span>(piles, hours):          <span class="cm"># binary search on the answer</span>
+    <span class="kw">def</span> <span class="fn">ok</span>(speed):
+        <span class="kw">return</span> sum((p + speed - <span class="nu">1</span>) // speed <span class="kw">for</span> p <span class="kw">in</span> piles) &lt;= hours
+    <span class="kw">return</span> first_true(<span class="nu">1</span>, max(piles) + <span class="nu">1</span>, ok)</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Infinite loops from mid rounding <span class="hint">(with lo &lt; hi, pair hi = mid with lo = mid + 1)</span></li><li>Mixing inclusive and exclusive bounds within one search</li><li>Predicate that is not actually monotonic</li><li>Rotated arrays with duplicates degrade to O(n) worst case</li><li>Overflow in (lo + hi) / 2 in fixed-width languages (lo + (hi − lo) / 2)</li></ul></div>
+  <p class="usedin">In the crosswalk: Search in rotated sorted array, Split array largest sum, Median of two sorted arrays, Time-based key-value store, Longest increasing subsequence</p>
+</section>
+<section class="tech" id="intervals">
+  <h4>Intervals, sorting, and sweep line</h4>
+  <p class="question">Sort by the right endpoint, then a single pass usually resolves overlaps.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Intervals, meetings, bookings</li><li>Overlap or conflict</li><li>How many at the same time</li><li>Insert into a schedule</li><li>Minimum resources to cover everything</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Sort by start, merge</th><td>Extend the last merged interval or start a new one</td><td class="cx">O(n log n)</td><td class="cx">O(n)</td><td>Merge intervals, insert interval (O(n) if pre-sorted)</td></tr><tr><th scope="row">Sort by end, greedy pick</th><td>Take the interval that finishes first</td><td class="cx">O(n log n)</td><td class="cx">O(1)</td><td>Max non-overlapping, erase overlaps, minimum arrows</td></tr><tr><th scope="row">Sweep line events</th><td>+1 at start, −1 at end, sort, running total</td><td class="cx">O(n log n)</td><td class="cx">O(n)</td><td>Max concurrent meetings, skyline (with a heap)</td></tr><tr><th scope="row">Heap of end times</th><td>Pop rooms that are free before assigning</td><td class="cx">O(n log n)</td><td class="cx">O(n)</td><td>Meeting rooms II, assigning servers or rooms</td></tr><tr><th scope="row">Two lists, two pointers</th><td>Advance whichever ends first</td><td class="cx">O(n + m)</td><td class="cx">O(n + m)</td><td>Interval list intersections, free time</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">merge</span>(intervals):
+    merged = []
+    <span class="kw">for</span> start, end <span class="kw">in</span> sorted(intervals):
+        <span class="kw">if</span> merged <span class="kw">and</span> start &lt;= merged[-<span class="nu">1</span>][<span class="nu">1</span>]:     <span class="cm"># closed intervals touch</span>
+            merged[-<span class="nu">1</span>][<span class="nu">1</span>] = max(merged[-<span class="nu">1</span>][<span class="nu">1</span>], end)
+        <span class="kw">else</span>:
+            merged.append([start, end])
+    <span class="kw">return</span> merged
+
+<span class="kw">def</span> <span class="fn">max_concurrent</span>(intervals):                    <span class="cm"># half-open [start, end)</span>
+    events = [(s, <span class="nu">1</span>) <span class="kw">for</span> s, _ <span class="kw">in</span> intervals] + [(e, -<span class="nu">1</span>) <span class="kw">for</span> _, e <span class="kw">in</span> intervals]
+    cur = best = <span class="nu">0</span>
+    <span class="kw">for</span> _, delta <span class="kw">in</span> sorted(events):               <span class="cm"># -1 sorts first on ties</span>
+        cur += delta
+        best = max(best, cur)
+    <span class="kw">return</span> best</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Closed vs half-open endpoints: do [1,2] and [2,3] overlap?</li><li>Tie ordering at equal times <span class="hint">(process ends before starts for half-open)</span></li><li>Sorting by start when the greedy proof needs end</li><li>Mutating input intervals the caller still uses</li></ul></div>
+  <p class="usedin">In the crosswalk: 3Sum, Merge intervals, Meeting rooms II</p>
+</section><h3 class="group">Ordered and prioritized</h3>
+<section class="tech" id="monostack">
+  <h4>Monotonic stack and deque</h4>
+  <p class="question">Keep a stack in sorted order so each element is pushed and popped once, answering nearest-greater questions in O(n).</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Next greater or smaller element</li><li>For each item, the nearest X to the left or right</li><li>Span or how many days until</li><li>Histogram rectangles</li><li>Remove characters or digits to get the smallest result</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Next greater / smaller</th><td>Decreasing (or increasing) stack of indices; resolve on pop</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Daily temperatures, next greater element, stock span</td></tr><tr><th scope="row">Both-side boundaries</th><td>Previous and next smaller per element, then contribution counting</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Largest rectangle in histogram, sum of subarray minimums</td></tr><tr><th scope="row">Monotonic deque</th><td>Drop dominated items from the back, expired from the front</td><td class="cx">O(n)</td><td class="cx">O(K)</td><td>Sliding window maximum, shortest subarray with sum at least K</td></tr><tr><th scope="row">Greedy removal stack</th><td>Pop larger previous items while removal budget allows</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Remove K digits, smallest subsequence of distinct characters</td></tr><tr><th scope="row">Parsing stack</th><td>Push context, pop on close</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Valid parentheses, basic calculator, decode string</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">next_greater</span>(nums):
+    result = [-<span class="nu">1</span>] * len(nums)
+    stack = []                                  <span class="cm"># indices; values decreasing</span>
+    <span class="kw">for</span> i, x <span class="kw">in</span> enumerate(nums):
+        <span class="kw">while</span> stack <span class="kw">and</span> nums[stack[-<span class="nu">1</span>]] &lt; x:
+            result[stack.pop()] = x
+        stack.append(i)
+    <span class="kw">return</span> result
+
+<span class="kw">def</span> <span class="fn">window_max</span>(nums, k):
+    dq, out = deque(), []                       <span class="cm"># indices; values decreasing</span>
+    <span class="kw">for</span> i, x <span class="kw">in</span> enumerate(nums):
+        <span class="kw">while</span> dq <span class="kw">and</span> nums[dq[-<span class="nu">1</span>]] &lt;= x:
+            dq.pop()
+        dq.append(i)
+        <span class="kw">if</span> dq[<span class="nu">0</span>] &lt;= i - k:
+            dq.popleft()                        <span class="cm"># fell out of the window</span>
+        <span class="kw">if</span> i &gt;= k - <span class="nu">1</span>:
+            out.append(nums[dq[<span class="nu">0</span>]])
+    <span class="kw">return</span> out</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Storing values when you need indices for distances or widths</li><li>Strict vs non-strict comparisons with duplicates <span class="hint">(double counting in contribution sums)</span></li><li>Forgetting to flush the stack at the end <span class="hint">(a sentinel value helps)</span></li><li>Assuming O(n²) because of the nested while (amortized O(n))</li></ul></div>
+  <p class="usedin">In the crosswalk: Trapping rain water, Daily temperatures, Largest rectangle in histogram, Sliding window maximum</p>
+</section>
+<section class="tech" id="heap">
+  <h4>Heaps and top-K</h4>
+  <p class="question">Always know the smallest or largest item under insertions, in O(log n).</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>K largest, smallest, closest, most frequent</li><li>A stream of values</li><li>Merge K sorted inputs</li><li>Repeatedly take the best available option</li><li>Running median</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Size-K min-heap</th><td>Push, evict smallest when size exceeds K</td><td class="cx">O(n log K)</td><td class="cx">O(K)</td><td>Top K from large or streaming input</td></tr><tr><th scope="row">Quickselect</th><td>Partition around a pivot until K lands</td><td class="cx">O(n) average, O(n²) worst</td><td class="cx">O(1)</td><td>One-off kth element on in-memory array</td></tr><tr><th scope="row">K-way merge</th><td>Heap holds the head of each list</td><td class="cx">O(N log K)</td><td class="cx">O(K)</td><td>Merge K sorted lists, smallest range covering K lists</td></tr><tr><th scope="row">Two heaps</th><td>Max-heap for lower half, min-heap for upper half, rebalance</td><td class="cx">O(log n) add, O(1) median</td><td class="cx">O(n)</td><td>Median of a data stream</td></tr><tr><th scope="row">Lazy deletion</th><td>Mark removed items, discard them when they surface at the top</td><td class="cx">O(log n) amortized</td><td class="cx">O(n)</td><td>Sliding window median, cancellable schedulers</td></tr><tr><th scope="row">Greedy with heap</th><td>Pop best, update, push back</td><td class="cx">O(n log n)</td><td class="cx">O(n)</td><td>Task scheduler, reorganize string, IPO, connect ropes</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">top_k_frequent</span>(nums, k):
+    heap = []                                   <span class="cm"># min-heap, size &lt;= k</span>
+    <span class="kw">for</span> value, count <span class="kw">in</span> Counter(nums).items():
+        heapq.heappush(heap, (count, value))
+        <span class="kw">if</span> len(heap) &gt; k:
+            heapq.heappop(heap)                 <span class="cm"># evict the smallest</span>
+    <span class="kw">return</span> [v <span class="kw">for</span> _, v <span class="kw">in</span> heap]
+
+<span class="kw">def</span> <span class="fn">merge_k_sorted</span>(lists):
+    heap = [(lst[<span class="nu">0</span>], i, <span class="nu">0</span>) <span class="kw">for</span> i, lst <span class="kw">in</span> enumerate(lists) <span class="kw">if</span> lst]
+    heapq.heapify(heap)                         <span class="cm"># (value, list id, position)</span>
+    out = []
+    <span class="kw">while</span> heap:
+        val, i, j = heapq.heappop(heap)
+        out.append(val)
+        <span class="kw">if</span> j + <span class="nu">1</span> &lt; len(lists[i]):
+            heapq.heappush(heap, (lists[i][j + <span class="nu">1</span>], i, j + <span class="nu">1</span>))
+    <span class="kw">return</span> out</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>heapq is min-only <span class="hint">(negate values for a max-heap)</span></li><li>Tuple ties falling through to uncomparable objects <span class="hint">(add a counter as tiebreaker)</span></li><li>heapify is O(n), not O <span class="hint">(n log n)</span></li><li>Using a heap when K is close to n <span class="hint">(just sort)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Meeting rooms II, Top K frequent elements, Find median from data stream, Merge K sorted lists, Network delay time, Task scheduler</p>
+</section><h3 class="group">Linked and hierarchical</h3>
+<section class="tech" id="linkedlist">
+  <h4>Linked list manipulation</h4>
+  <p class="question">Rewire pointers in place, using a dummy node and pointer gaps to avoid special cases.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Linked list input</li><li>In place, O(1) extra space</li><li>Cycle detection or its start</li><li>Middle node, or nth from the end</li><li>Reorder, reverse a section</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Dummy head</th><td>Sentinel before head so head changes are not special</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Removal, merging, partitioning</td></tr><tr><th scope="row">In-place reversal</th><td>prev / cur / next rewiring; for sublists reconnect both ends</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Reverse list, reverse between, reverse in K-groups, palindrome check</td></tr><tr><th scope="row">Fast and slow</th><td>Slow moves 1, fast moves 2</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Middle, cycle detection, cycle start (reset one pointer to head)</td></tr><tr><th scope="row">Fixed gap</th><td>Advance one pointer n steps ahead first</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Remove nth from end</td></tr><tr><th scope="row">Hash map + doubly linked list</th><td>Map key to node; list keeps order</td><td class="cx">O(1) per op</td><td class="cx">O(n)</td><td>LRU cache</td></tr><tr><th scope="row">Interleave copies</th><td>Insert copy after each node, set randoms, split</td><td class="cx">O(n)</td><td class="cx">O(1) extra</td><td>Copy list with random pointer</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">reverse</span>(head):
+    prev = <span class="kw">None</span>
+    <span class="kw">while</span> head:
+        nxt = head.next          <span class="cm"># save before rewiring</span>
+        head.next = prev
+        prev, head = head, nxt
+    <span class="kw">return</span> prev
+
+<span class="kw">def</span> <span class="fn">remove_nth_from_end</span>(head, n):
+    dummy = ListNode(<span class="nu">0</span>, head)    <span class="cm"># handles removing the head</span>
+    fast = slow = dummy
+    <span class="kw">for</span> _ <span class="kw">in</span> range(n + <span class="nu">1</span>):
+        fast = fast.next         <span class="cm"># open a gap of n nodes</span>
+    <span class="kw">while</span> fast:
+        fast, slow = fast.next, slow.next
+    slow.next = slow.next.next
+    <span class="kw">return</span> dummy.next</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Losing the next pointer before rewiring</li><li>Leaving the old tail pointing somewhere <span class="hint">(accidental cycle)</span></li><li>Null checks: while fast and fast.next</li><li>Leftover group shorter than K in K-group reversal</li></ul></div>
+  <p class="usedin">In the crosswalk: Merge K sorted lists, LRU cache, Reverse nodes in K-group</p>
+</section>
+<section class="tech" id="tree">
+  <h4>Tree traversal and BSTs</h4>
+  <p class="question">Decide what each recursive call returns to its parent and what it passes to its children.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Tree or BST input</li><li>Path, depth, height, diameter</li><li>Level by level</li><li>Ancestor of two nodes</li><li>Serialize or construct a tree</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Postorder, return upward</th><td>Children return summaries, node combines, updates a global best</td><td class="cx">O(n)</td><td class="cx">O(h)</td><td>Height, balanced, diameter, max path sum</td></tr><tr><th scope="row">Preorder, pass downward</th><td>Carry state (bounds, running sum, max so far) into children</td><td class="cx">O(n)</td><td class="cx">O(h)</td><td>Validate BST, path sum, count good nodes</td></tr><tr><th scope="row">BFS by level</th><td>Queue; process len(queue) nodes per level</td><td class="cx">O(n)</td><td class="cx">O(width)</td><td>Level order, right side view, minimum depth, zigzag</td></tr><tr><th scope="row">Inorder on BST</th><td>Sorted order, often iterative with a stack</td><td class="cx">O(n) or O(h + k)</td><td class="cx">O(h)</td><td>Kth smallest, BST iterator, recover swapped nodes</td></tr><tr><th scope="row">Lowest common ancestor</th><td>Return node if found in both subtrees; for BST walk down by value</td><td class="cx">O(n); BST O(h)</td><td class="cx">O(h)</td><td>LCA in binary tree or BST</td></tr><tr><th scope="row">Build from traversals</th><td>Preorder gives root; inorder index map splits sides</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Construct from preorder and inorder, serialize with null markers</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">diameter</span>(root):
+    best = <span class="nu">0</span>
+    <span class="kw">def</span> <span class="fn">height</span>(node):                    <span class="cm"># return value flows up</span>
+        <span class="kw">nonlocal</span> best
+        <span class="kw">if</span> <span class="kw">not</span> node:
+            <span class="kw">return</span> <span class="nu">0</span>
+        left, right = height(node.left), height(node.right)
+        best = max(best, left + right)   <span class="cm"># path through this node</span>
+        <span class="kw">return</span> <span class="nu">1</span> + max(left, right)      <span class="cm"># path usable by the parent</span>
+    height(root)
+    <span class="kw">return</span> best
+
+<span class="kw">def</span> <span class="fn">level_order</span>(root):
+    levels, q = [], deque([root] <span class="kw">if</span> root <span class="kw">else</span> [])
+    <span class="kw">while</span> q:
+        levels.append([])
+        <span class="kw">for</span> _ <span class="kw">in</span> range(len(q)):          <span class="cm"># exactly one level</span>
+            node = q.popleft()
+            levels[-<span class="nu">1</span>].append(node.val)
+            q.extend(c <span class="kw">for</span> c <span class="kw">in</span> (node.left, node.right) <span class="kw">if</span> c)
+    <span class="kw">return</span> levels</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Recursion depth on skewed trees <span class="hint">(Python&#x27;s default limit is about 1,000; go iterative)</span></li><li>Confusing the path through a node (for the answer) with the path returned to the parent</li><li>Validating a BST by comparing only with the parent <span class="hint">(pass bounds)</span></li><li>O(n²) builds from searching inorder each time <span class="hint">(use an index map)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Binary tree maximum path sum, Lowest common ancestor, Serialize and deserialize binary tree</p>
+</section>
+<section class="tech" id="trie">
+  <h4>Tries</h4>
+  <p class="question">Share prefixes across many strings so prefix queries cost the length of the prefix.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Prefix search or autocomplete</li><li>Search many words at once</li><li>Dictionary of words against a grid or stream</li><li>Longest common prefix across many strings</li><li>Maximum XOR of a pair</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Dict-of-dicts trie</th><td>Nested maps with an end marker</td><td class="cx">O(L) per op</td><td class="cx">O(total chars)</td><td>General purpose, sparse alphabets</td></tr><tr><th scope="row">Array children</th><td>Fixed 26-slot arrays per node</td><td class="cx">O(L) per op, faster constants</td><td class="cx">O(26 · nodes)</td><td>Lowercase letters, performance-sensitive</td></tr><tr><th scope="row">Trie + grid backtracking</th><td>Walk the trie while walking the board; prune found words</td><td class="cx">O(cells · 4^L) worst</td><td class="cx">O(total chars)</td><td>Word search II, boggle</td></tr><tr><th scope="row">Top suggestions per node</th><td>Store best K completions at each node</td><td class="cx">O(L) query</td><td class="cx">O(nodes · K)</td><td>Autocomplete with ranking</td></tr><tr><th scope="row">Binary trie</th><td>Insert numbers bit by bit; greedily take opposite bits</td><td class="cx">O(n · bits)</td><td class="cx">O(n · bits)</td><td>Maximum XOR of two numbers</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">class</span> <span class="fn">Trie</span>:
+    END = object()                       <span class="cm"># sentinel: can&#x27;t collide with a char</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        self.root = {}
+
+    <span class="kw">def</span> <span class="fn">insert</span>(self, word):
+        node = self.root
+        <span class="kw">for</span> ch <span class="kw">in</span> word:
+            node = node.setdefault(ch, {})
+        node[Trie.END] = word
+
+    <span class="kw">def</span> <span class="fn">find_prefix</span>(self, prefix):
+        node = self.root
+        <span class="kw">for</span> ch <span class="kw">in</span> prefix:
+            <span class="kw">if</span> ch <span class="kw">not</span> <span class="kw">in</span> node:
+                <span class="kw">return</span> <span class="kw">None</span>
+            node = node[ch]
+        <span class="kw">return</span> node
+
+    <span class="kw">def</span> <span class="fn">words_with_prefix</span>(self, prefix):
+        node, out = self.find_prefix(prefix), []
+        stack = [node] <span class="kw">if</span> node <span class="kw">is</span> <span class="kw">not</span> <span class="kw">None</span> <span class="kw">else</span> []
+        <span class="kw">while</span> stack:
+            cur = stack.pop()
+            <span class="kw">for</span> key, child <span class="kw">in</span> cur.items():
+                <span class="kw">if</span> key <span class="kw">is</span> Trie.END:
+                    out.append(child)
+                <span class="kw">else</span>:
+                    stack.append(child)
+        <span class="kw">return</span> out</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>End marker colliding with a real character <span class="hint">(use a sentinel object or field)</span></li><li>Not pruning found words or dead branches in word search II <span class="hint">(time limit)</span></li><li>Memory blowup with large alphabets or long keys <span class="hint">(compressed tries)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Word search II</p>
+</section><h3 class="group">Graphs</h3>
+<section class="tech" id="graph">
+  <h4>Graph traversal</h4>
+  <p class="question">Model the problem as nodes and edges, then choose BFS for distance and DFS for exploration.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Grid with islands, regions, or obstacles</li><li>Connected, reachable, components</li><li>Minimum steps or moves</li><li>Transform one state into another</li><li>Two groups with no conflicts (bipartite)</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">BFS</th><td>Queue, mark visited on enqueue</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Shortest path in unweighted graphs</td></tr><tr><th scope="row">Multi-source BFS</th><td>Start the queue with every source at distance 0</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Rotting oranges, distance to nearest gate, 01 matrix</td></tr><tr><th scope="row">DFS</th><td>Stack or recursion; flood fill</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Islands, components, clone graph, path existence</td></tr><tr><th scope="row">Directed cycle detection</th><td>Three colors: unvisited, on stack, done</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Detect cycles, course schedule</td></tr><tr><th scope="row">Bipartite check</th><td>BFS or DFS two-coloring</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Possible bipartition, is graph bipartite</td></tr><tr><th scope="row">State-space search</th><td>Node = (position, extra state such as keys or remaining eliminations)</td><td class="cx">O(states · transitions)</td><td class="cx">O(states)</td><td>Open the lock, shortest path with obstacle elimination, word ladder</td></tr><tr><th scope="row">Bidirectional BFS</th><td>Expand from both ends, meet in the middle</td><td class="cx">Roughly O(b^(d/2))</td><td class="cx">Same</td><td>Word ladder with large dictionaries</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code>DIRS = ((<span class="nu">1</span>, <span class="nu">0</span>), (-<span class="nu">1</span>, <span class="nu">0</span>), (<span class="nu">0</span>, <span class="nu">1</span>), (<span class="nu">0</span>, -<span class="nu">1</span>))
+
+<span class="kw">def</span> <span class="fn">multi_source_bfs</span>(grid, sources):         <span class="cm"># grid cells: &quot;#&quot; is a wall</span>
+    rows, cols = len(grid), len(grid[<span class="nu">0</span>])
+    dist = {cell: <span class="nu">0</span> <span class="kw">for</span> cell <span class="kw">in</span> sources}
+    q = deque(sources)
+    <span class="kw">while</span> q:
+        r, c = q.popleft()
+        <span class="kw">for</span> dr, dc <span class="kw">in</span> DIRS:
+            nr, nc = r + dr, c + dc
+            <span class="kw">if</span> (<span class="nu">0</span> &lt;= nr &lt; rows <span class="kw">and</span> <span class="nu">0</span> &lt;= nc &lt; cols
+                    <span class="kw">and</span> grid[nr][nc] != <span class="st">&quot;#&quot;</span> <span class="kw">and</span> (nr, nc) <span class="kw">not</span> <span class="kw">in</span> dist):
+                dist[(nr, nc)] = dist[(r, c)] + <span class="nu">1</span>   <span class="cm"># mark on enqueue</span>
+                q.append((nr, nc))
+    <span class="kw">return</span> dist
+
+<span class="kw">def</span> <span class="fn">count_components</span>(n, edges):
+    graph = defaultdict(list)
+    <span class="kw">for</span> a, b <span class="kw">in</span> edges:
+        graph[a].append(b)
+        graph[b].append(a)
+    seen, count = set(), <span class="nu">0</span>
+    <span class="kw">for</span> start <span class="kw">in</span> range(n):
+        <span class="kw">if</span> start <span class="kw">in</span> seen:
+            <span class="kw">continue</span>
+        count += <span class="nu">1</span>
+        seen.add(start)
+        stack = [start]
+        <span class="kw">while</span> stack:
+            <span class="kw">for</span> nxt <span class="kw">in</span> graph[stack.pop()]:
+                <span class="kw">if</span> nxt <span class="kw">not</span> <span class="kw">in</span> seen:
+                    seen.add(nxt)
+                    stack.append(nxt)
+    <span class="kw">return</span> count</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Marking visited on dequeue <span class="hint">(duplicates flood the queue)</span></li><li>Missing reverse edges for undirected graphs</li><li>State that omits something affecting future moves</li><li>Recursive DFS on a 1,000 × 1,000 grid <span class="hint">(stack overflow in Python)</span></li><li>Disconnected graphs: loop over all nodes, not just node 0</li></ul></div>
+  <p class="usedin">In the crosswalk: Serialize and deserialize binary tree, Number of islands, Rotting oranges, Word ladder, Course schedule II, Alien dictionary, Accounts merge, Cheapest flights within K stops, Coin change, Jump game II</p>
+</section>
+<section class="tech" id="topo">
+  <h4>Topological sort</h4>
+  <p class="question">Order a DAG so every dependency comes before what depends on it, detecting cycles on the way.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Prerequisites or dependencies</li><li>Build or install order</li><li>Is it possible to finish all tasks</li><li>Ordering derived from comparisons</li><li>Minimum number of rounds or semesters</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Kahn&#x27;s algorithm</th><td>Queue of zero-indegree nodes; decrement neighbors</td><td class="cx">O(V + E)</td><td class="cx">O(V + E)</td><td>Course schedule, build order, cycle detection via leftover nodes</td></tr><tr><th scope="row">DFS postorder</th><td>Reverse postorder with three-color cycle check</td><td class="cx">O(V + E)</td><td class="cx">O(V + E)</td><td>When already doing DFS, or recursion is natural</td></tr><tr><th scope="row">Lexicographically smallest</th><td>Heap in place of queue</td><td class="cx">O(V log V + E)</td><td class="cx">O(V + E)</td><td>Unique smallest valid order</td></tr><tr><th scope="row">DP over topological order</th><td>Relax longest or shortest paths in order</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Parallel courses (minimum semesters), longest path in DAG</td></tr><tr><th scope="row">Constraint extraction</th><td>Compare adjacent items to derive edges</td><td class="cx">O(total chars)</td><td class="cx">O(alphabet²)</td><td>Alien dictionary, sequence reconstruction</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">topo_order</span>(n, edges):                  <span class="cm"># (a, b) means a before b</span>
+    graph, indegree = defaultdict(list), [<span class="nu">0</span>] * n
+    <span class="kw">for</span> a, b <span class="kw">in</span> edges:
+        graph[a].append(b)
+        indegree[b] += <span class="nu">1</span>
+    q = deque(i <span class="kw">for</span> i <span class="kw">in</span> range(n) <span class="kw">if</span> indegree[i] == <span class="nu">0</span>)
+    order = []
+    <span class="kw">while</span> q:
+        node = q.popleft()
+        order.append(node)
+        <span class="kw">for</span> nxt <span class="kw">in</span> graph[node]:
+            indegree[nxt] -= <span class="nu">1</span>
+            <span class="kw">if</span> indegree[nxt] == <span class="nu">0</span>:
+                q.append(nxt)
+    <span class="kw">return</span> order <span class="kw">if</span> len(order) == n <span class="kw">else</span> <span class="kw">None</span>  <span class="cm"># None: cycle exists</span></code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Alien dictionary: a longer word before its own prefix is invalid</li><li>Duplicate edges inflating indegrees</li><li>Omitting nodes that have no edges</li><li>Unique order check: queue size must never exceed 1</li></ul></div>
+  <p class="usedin">In the crosswalk: Course schedule II, Alien dictionary</p>
+</section>
+<section class="tech" id="dsu">
+  <h4>Union-find</h4>
+  <p class="question">Track which items belong to the same group as merges arrive, in near-constant time.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Connectivity as edges are added</li><li>Merge groups that share something</li><li>Are X and Y connected</li><li>Redundant edge that creates a cycle</li><li>Equivalence relations</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Path compression + union by size</th><td>Flatten on find, attach smaller under larger</td><td class="cx">O(α(n)) amortized</td><td class="cx">O(n)</td><td>Any dynamic connectivity</td></tr><tr><th scope="row">Online component counting</th><td>Decrement count on each successful union</td><td class="cx">O(k · α(n))</td><td class="cx">O(n)</td><td>Number of islands II, number of provinces</td></tr><tr><th scope="row">Kruskal&#x27;s MST</th><td>Sort edges, union if it connects new components</td><td class="cx">O(E log E)</td><td class="cx">O(V)</td><td>Minimum cost to connect points</td></tr><tr><th scope="row">Cycle detection</th><td>A union that finds a shared root closes a cycle</td><td class="cx">O(E · α(V))</td><td class="cx">O(V)</td><td>Redundant connection, graph valid tree</td></tr><tr><th scope="row">Keyed DSU</th><td>Map arbitrary keys (emails, strings) to integer ids</td><td class="cx">O(n · α(n))</td><td class="cx">O(n)</td><td>Accounts merge, similar string groups</td></tr><tr><th scope="row">Weighted DSU</th><td>Store ratio or offset to parent</td><td class="cx">O(α(n))</td><td class="cx">O(n)</td><td>Evaluate division</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">class</span> <span class="fn">DSU</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, n):
+        self.parent = list(range(n))
+        self.size = [<span class="nu">1</span>] * n
+        self.components = n
+
+    <span class="kw">def</span> <span class="fn">find</span>(self, x):
+        <span class="kw">while</span> self.parent[x] != x:
+            self.parent[x] = self.parent[self.parent[x]]   <span class="cm"># path halving</span>
+            x = self.parent[x]
+        <span class="kw">return</span> x
+
+    <span class="kw">def</span> <span class="fn">union</span>(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        <span class="kw">if</span> ra == rb:
+            <span class="kw">return</span> <span class="kw">False</span>                  <span class="cm"># already connected: a cycle edge</span>
+        <span class="kw">if</span> self.size[ra] &lt; self.size[rb]:
+            ra, rb = rb, ra               <span class="cm"># union by size</span>
+        self.parent[rb] = ra
+        self.size[ra] += self.size[rb]
+        self.components -= <span class="nu">1</span>
+        <span class="kw">return</span> <span class="kw">True</span></code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Comparing parent[x] instead of find <span class="hint">(x)</span></li><li>Counting components without calling find on each node</li><li>No support for deletions <span class="hint">(process offline in reverse)</span></li><li>Forgetting to update the component count</li></ul></div>
+  <p class="usedin">In the crosswalk: Longest consecutive sequence, Number of islands, Accounts merge</p>
+</section>
+<section class="tech" id="shortest">
+  <h4>Weighted shortest paths</h4>
+  <p class="question">Pick the algorithm by edge weights and constraints: BFS, Dijkstra, 0-1 BFS, or bounded relaxation.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Minimum cost, time, or effort</li><li>Weighted edges</li><li>Network delay</li><li>At most K stops or steps</li><li>Negative weights</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Dijkstra</th><td>Min-heap by distance; skip stale entries</td><td class="cx">O((V + E) log V)</td><td class="cx">O(V)</td><td>Non-negative weights: network delay, path with minimum effort</td></tr><tr><th scope="row">0-1 BFS</th><td>Deque: weight 0 to front, weight 1 to back</td><td class="cx">O(V + E)</td><td class="cx">O(V)</td><td>Minimum obstacles to remove, minimum cost to make valid path</td></tr><tr><th scope="row">Bellman-Ford / K rounds</th><td>Relax all edges per round from the previous round&#x27;s copy</td><td class="cx">O(K · E)</td><td class="cx">O(V)</td><td>Cheapest flights within K stops, negative edges</td></tr><tr><th scope="row">Dijkstra on expanded state</th><td>Node = (vertex, extra state)</td><td class="cx">O(states log states)</td><td class="cx">O(states)</td><td>Constraints like fuel, stops, or keys</td></tr><tr><th scope="row">Floyd-Warshall</th><td>Triple loop over intermediate nodes</td><td class="cx">O(V³)</td><td class="cx">O(V²)</td><td>All pairs with small V</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">dijkstra</span>(graph, source):               <span class="cm"># graph[u] = [(v, weight), ...]</span>
+    dist = {source: <span class="nu">0</span>}
+    heap = [(<span class="nu">0</span>, source)]
+    <span class="kw">while</span> heap:
+        d, u = heapq.heappop(heap)
+        <span class="kw">if</span> d &gt; dist[u]:
+            <span class="kw">continue</span>                          <span class="cm"># stale entry, skip</span>
+        <span class="kw">for</span> v, w <span class="kw">in</span> graph.get(u, ()):
+            nd = d + w
+            <span class="kw">if</span> nd &lt; dist.get(v, float(<span class="st">&quot;inf&quot;</span>)):
+                dist[v] = nd
+                heapq.heappush(heap, (nd, v))
+    <span class="kw">return</span> dist
+
+<span class="kw">def</span> <span class="fn">cheapest_within_k_stops</span>(n, flights, src, dst, k):
+    cost = [float(<span class="st">&quot;inf&quot;</span>)] * n
+    cost[src] = <span class="nu">0</span>
+    <span class="kw">for</span> _ <span class="kw">in</span> range(k + <span class="nu">1</span>):                    <span class="cm"># k stops = k + 1 edges</span>
+        nxt = cost[:]                         <span class="cm"># relax from last round only</span>
+        <span class="kw">for</span> u, v, w <span class="kw">in</span> flights:
+            <span class="kw">if</span> cost[u] + w &lt; nxt[v]:
+                nxt[v] = cost[u] + w
+        cost = nxt
+    <span class="kw">return</span> -<span class="nu">1</span> <span class="kw">if</span> cost[dst] == float(<span class="st">&quot;inf&quot;</span>) <span class="kw">else</span> cost[dst]</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Processing stale heap entries <span class="hint">(check d &gt; dist[u])</span></li><li>Dijkstra with negative weights</li><li>K-stop limits: plain Dijkstra discards paths that are costlier but use fewer stops</li><li>Bellman-Ford rounds reading values updated in the same round</li></ul></div>
+  <p class="usedin">In the crosswalk: Network delay time, Cheapest flights within K stops</p>
+</section><h3 class="group">Search and optimization</h3>
+<section class="tech" id="backtrack">
+  <h4>Backtracking</h4>
+  <p class="question">Build candidates one choice at a time, undo, and prune branches that cannot succeed.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Generate all combinations, permutations, or subsets</li><li>n is small (about 20 or less)</li><li>Place items so no two conflict</li><li>Find any or all paths in a grid</li><li>Partition into valid pieces</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Subsets</th><td>Start index; record at every node</td><td class="cx">O(n · 2ⁿ)</td><td class="cx">O(n)</td><td>Subsets, subsets with duplicates</td></tr><tr><th scope="row">Permutations</th><td>Used set or in-place swaps</td><td class="cx">O(n · n!)</td><td class="cx">O(n)</td><td>Permutations, next permutation variants</td></tr><tr><th scope="row">Combinations to target</th><td>Start index; reuse with i, no reuse with i + 1</td><td class="cx">Exponential, pruned</td><td class="cx">O(target)</td><td>Combination sum I, II, III</td></tr><tr><th scope="row">Constraint placement</th><td>Sets for columns and diagonals</td><td class="cx">O(n!) pruned</td><td class="cx">O(n)</td><td>N-Queens, sudoku solver</td></tr><tr><th scope="row">Grid path search</th><td>Mark cell in place, recurse, restore</td><td class="cx">O(cells · 3^L)</td><td class="cx">O(L)</td><td>Word search, unique paths III</td></tr><tr><th scope="row">Partitioning</th><td>Choose a cut, validate prefix, recurse on rest</td><td class="cx">O(n · 2ⁿ)</td><td class="cx">O(n)</td><td>Palindrome partitioning, restore IP addresses</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">combination_sum</span>(candidates, target):    <span class="cm"># each number reusable</span>
+    candidates = sorted(candidates)
+    result, path = [], []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start, remaining):
+        <span class="kw">if</span> remaining == <span class="nu">0</span>:
+            result.append(path[:])             <span class="cm"># copy, not the live list</span>
+            <span class="kw">return</span>
+        <span class="kw">for</span> i <span class="kw">in</span> range(start, len(candidates)):
+            <span class="kw">if</span> candidates[i] &gt; remaining:
+                <span class="kw">break</span>                          <span class="cm"># sorted: prune the rest</span>
+            path.append(candidates[i])
+            backtrack(i, remaining - candidates[i])   <span class="cm"># i + 1 if no reuse</span>
+            path.pop()                         <span class="cm"># undo</span>
+    backtrack(<span class="nu">0</span>, target)
+    <span class="kw">return</span> result
+
+<span class="kw">def</span> <span class="fn">subsets_with_dups</span>(nums):
+    nums = sorted(nums)
+    result, path = [], []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start):
+        result.append(path[:])
+        <span class="kw">for</span> i <span class="kw">in</span> range(start, len(nums)):
+            <span class="kw">if</span> i &gt; start <span class="kw">and</span> nums[i] == nums[i - <span class="nu">1</span>]:
+                <span class="kw">continue</span>                       <span class="cm"># skip duplicate branch</span>
+            path.append(nums[i])
+            backtrack(i + <span class="nu">1</span>)
+            path.pop()
+    backtrack(<span class="nu">0</span>)
+    <span class="kw">return</span> result</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Appending the live path instead of a copy</li><li>Forgetting to undo state after the recursive call</li><li>Duplicate results with repeated values <span class="hint">(sort, skip i &gt; start with equal neighbor)</span></li><li>Weak pruning <span class="hint">(sort candidates so you can break early)</span></li></ul></div>
+  <p class="usedin">In the crosswalk: Word search II, N-Queens</p>
+</section>
+<section class="tech" id="dp">
+  <h4>Dynamic programming</h4>
+  <p class="question">Define a state precisely, write the transition from smaller states, and reuse results.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Number of ways</li><li>Minimum or maximum cost</li><li>Can you reach, partition, or form</li><li>Choices at each step that affect later options</li><li>A brute-force recursion that repeats subproblems</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Top-down memoization</th><td>Recursive function with @cache</td><td class="cx">O(states · transition)</td><td class="cx">O(states) + stack</td><td>Fastest to write; state is natural</td></tr><tr><th scope="row">Bottom-up with rolling arrays</th><td>Table in dependency order, keep only needed rows</td><td class="cx">Same time</td><td class="cx">Often O(one row)</td><td>Deep recursion, memory limits</td></tr><tr><th scope="row">Linear sequence</th><td>dp[i] from dp[i − 1], dp[i − 2]</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>House robber, climbing stairs, decode ways</td></tr><tr><th scope="row">Knapsack</th><td>0/1: iterate capacity downward. Unbounded: upward</td><td class="cx">O(n · W)</td><td class="cx">O(W)</td><td>Coin change, partition equal subset sum, target sum</td></tr><tr><th scope="row">Two sequences</th><td>dp[i][j] over prefixes of both</td><td class="cx">O(mn)</td><td class="cx">O(min(m, n))</td><td>LCS, edit distance, distinct subsequences, regex matching</td></tr><tr><th scope="row">Interval</th><td>dp[l][r] by increasing length</td><td class="cx">O(n³)</td><td class="cx">O(n²)</td><td>Burst balloons, palindromic substrings, stone game</td></tr><tr><th scope="row">LIS</th><td>O(n²) DP, or tails array with bisect</td><td class="cx">O(n log n)</td><td class="cx">O(n)</td><td>Longest increasing subsequence, Russian doll envelopes</td></tr><tr><th scope="row">State machine</th><td>dp[i][holding / cooldown]</td><td class="cx">O(n · states)</td><td class="cx">O(states)</td><td>Stock trading with cooldown, fee, or K transactions</td></tr><tr><th scope="row">Bitmask</th><td>dp[mask][last]</td><td class="cx">O(2ⁿ · n²)</td><td class="cx">O(2ⁿ · n)</td><td>Shortest path visiting all nodes, assignment with n ≤ 20</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">coin_change</span>(coins, amount):              <span class="cm"># unbounded knapsack</span>
+    INF = float(<span class="st">&quot;inf&quot;</span>)
+    best = [<span class="nu">0</span>] + [INF] * amount
+    <span class="kw">for</span> a <span class="kw">in</span> range(<span class="nu">1</span>, amount + <span class="nu">1</span>):
+        <span class="kw">for</span> c <span class="kw">in</span> coins:
+            <span class="kw">if</span> c &lt;= a <span class="kw">and</span> best[a - c] + <span class="nu">1</span> &lt; best[a]:
+                best[a] = best[a - c] + <span class="nu">1</span>
+    <span class="kw">return</span> -<span class="nu">1</span> <span class="kw">if</span> best[amount] == INF <span class="kw">else</span> best[amount]
+
+<span class="kw">def</span> <span class="fn">edit_distance</span>(a, b):                     <span class="cm"># two sequences, rolling row</span>
+    prev = list(range(len(b) + <span class="nu">1</span>))
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="nu">1</span>, len(a) + <span class="nu">1</span>):
+        cur = [i] + [<span class="nu">0</span>] * len(b)
+        <span class="kw">for</span> j <span class="kw">in</span> range(<span class="nu">1</span>, len(b) + <span class="nu">1</span>):
+            <span class="kw">if</span> a[i - <span class="nu">1</span>] == b[j - <span class="nu">1</span>]:
+                cur[j] = prev[j - <span class="nu">1</span>]
+            <span class="kw">else</span>:
+                cur[j] = <span class="nu">1</span> + min(prev[j], cur[j - <span class="nu">1</span>], prev[j - <span class="nu">1</span>])
+        prev = cur
+    <span class="kw">return</span> prev[-<span class="nu">1</span>]
+
+<span class="kw">def</span> <span class="fn">lis_length</span>(nums):                        <span class="cm"># O(n log n) patience sorting</span>
+    tails = []
+    <span class="kw">for</span> x <span class="kw">in</span> nums:
+        i = bisect_left(tails, x)
+        <span class="kw">if</span> i == len(tails):
+            tails.append(x)
+        <span class="kw">else</span>:
+            tails[i] = x
+    <span class="kw">return</span> len(tails)</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>A fuzzy state definition <span class="hint">(write in words what dp[i] means before coding)</span></li><li>Loop order: coin change II counts combinations with coins outer, permutations with amount outer</li><li>0/1 knapsack iterating capacity upward <span class="hint">(reuses an item)</span></li><li>Missing base cases, or initializing min problems with 0 instead of infinity</li><li>Memoizing on mutable or unhashable arguments</li></ul></div>
+  <p class="usedin">In the crosswalk: Split array largest sum, Binary tree maximum path sum, Cheapest flights within K stops, Coin change, Edit distance, Longest increasing subsequence</p>
+</section>
+<section class="tech" id="greedy">
+  <h4>Greedy</h4>
+  <p class="question">Make the locally best choice when an exchange argument shows it never hurts.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Minimum number of steps, items, or groups</li><li>Maximum you can achieve with one pass</li><li>Sorting makes the choice obvious</li><li>Reach, cover, or schedule</li><li>DP works but constraints demand O(n) or O(n log n)</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">Sort then choose</th><td>Order by the key the proof needs</td><td class="cx">O(n log n)</td><td class="cx">O(1)</td><td>Interval scheduling, assign cookies, boats to save people</td></tr><tr><th scope="row">Farthest reach</th><td>Track max reachable index, jump when the layer ends</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Jump game I and II, video stitching</td></tr><tr><th scope="row">Reset on negative</th><td>Restart the running total when it cannot help</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Maximum subarray (Kadane), gas station</td></tr><tr><th scope="row">Heap-driven</th><td>Take the currently best option repeatedly</td><td class="cx">O(n log n)</td><td class="cx">O(n)</td><td>Task scheduler, reorganize string, IPO</td></tr><tr><th scope="row">Two-pass constraints</th><td>Satisfy left neighbors, then right neighbors</td><td class="cx">O(n)</td><td class="cx">O(n)</td><td>Candy, queue reconstruction</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">max_non_overlapping</span>(intervals):          <span class="cm"># sort by END, not start</span>
+    count, last_end = <span class="nu">0</span>, float(<span class="st">&quot;-inf&quot;</span>)
+    <span class="kw">for</span> start, end <span class="kw">in</span> sorted(intervals, key=<span class="kw">lambda</span> iv: iv[<span class="nu">1</span>]):
+        <span class="kw">if</span> start &gt;= last_end:
+            count, last_end = count + <span class="nu">1</span>, end
+    <span class="kw">return</span> count
+
+<span class="kw">def</span> <span class="fn">min_jumps</span>(jumps):                        <span class="cm"># BFS in layers, O(n)</span>
+    steps = cur_end = farthest = <span class="nu">0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(len(jumps) - <span class="nu">1</span>):
+        farthest = max(farthest, i + jumps[i])
+        <span class="kw">if</span> i == cur_end:                      <span class="cm"># layer exhausted: jump</span>
+            steps += <span class="nu">1</span>
+            cur_end = farthest
+    <span class="kw">return</span> steps</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Greedy that is simply wrong <span class="hint">(coin change with arbitrary denominations: try small counterexamples)</span></li><li>Not being able to justify correctness <span class="hint">(exchange argument: swapping to the greedy choice never worsens the answer)</span></li><li>Sorting by the wrong key</li></ul></div>
+  <p class="usedin">In the crosswalk: Split array largest sum, Jump game II, Task scheduler</p>
+</section>
+<section class="tech" id="bits">
+  <h4>Bit manipulation</h4>
+  <p class="question">Use XOR, masks, and bit tricks for constant space or to encode small sets.</p>
+  <div class="signals"><h5>Recognition signals</h5><ul><li>Every element appears twice except one</li><li>No extra space and no arithmetic tricks left</li><li>Subsets of 20 or fewer items</li><li>XOR, powers of two, counting set bits</li></ul></div>
+  <div class="scroll"><table class="opts">
+    <thead><tr><th scope="col">Variant</th><th scope="col">How it works</th><th scope="col">Time</th><th scope="col">Space</th><th scope="col">Use it for</th></tr></thead>
+    <tbody><tr><th scope="row">XOR cancellation</th><td>x ^ x = 0, x ^ 0 = x</td><td class="cx">O(n)</td><td class="cx">O(1)</td><td>Single number, missing number</td></tr><tr><th scope="row">Low bit tricks</th><td>x &amp; (x − 1) clears lowest set bit; x &amp; −x isolates it</td><td class="cx">O(set bits)</td><td class="cx">O(1)</td><td>Power of two, counting bits, single number III</td></tr><tr><th scope="row">Bitmask as a set</th><td>Bit i set means item i chosen</td><td class="cx">O(2ⁿ) enumeration</td><td class="cx">O(1) per mask</td><td>Subsets, bitmask DP states</td></tr><tr><th scope="row">Submask enumeration</th><td>sub = (sub − 1) &amp; mask</td><td class="cx">O(3ⁿ) over all masks</td><td class="cx">O(1)</td><td>DP over subsets</td></tr><tr><th scope="row">Per-bit counting</th><td>Count ones at each bit position modulo k</td><td class="cx">O(32n)</td><td class="cx">O(1)</td><td>Single number II (others appear three times)</td></tr></tbody></table></div>
+  <div class="codewrap"><h5>Template</h5><pre class="code"><code><span class="kw">def</span> <span class="fn">single_number</span>(nums):                    <span class="cm"># pairs cancel under XOR</span>
+    <span class="kw">return</span> reduce(xor, nums, <span class="nu">0</span>)
+
+<span class="kw">def</span> <span class="fn">count_bits_up_to</span>(n):
+    bits = [<span class="nu">0</span>] * (n + <span class="nu">1</span>)
+    <span class="kw">for</span> i <span class="kw">in</span> range(<span class="nu">1</span>, n + <span class="nu">1</span>):
+        bits[i] = bits[i &gt;&gt; <span class="nu">1</span>] + (i &amp; <span class="nu">1</span>)
+    <span class="kw">return</span> bits
+
+<span class="kw">def</span> <span class="fn">submasks</span>(mask):                          <span class="cm"># all non-empty submasks</span>
+    sub = mask
+    <span class="kw">while</span> sub:
+        <span class="kw">yield</span> sub
+        sub = (sub - <span class="nu">1</span>) &amp; mask</code></pre></div>
+  <div class="pitfalls"><h5>Where it goes wrong</h5><ul><li>Python integers are unbounded <span class="hint">(mask with 0xFFFFFFFF to emulate 32-bit and handle negatives)</span></li><li>Operator precedence: in C, C++, and Java, &amp; binds more loosely than == (parenthesize); Python groups x &amp; 1 == 1 as expected</li><li>Shifting signed negatives in fixed-width languages</li></ul></div>
+  <p class="usedin">In the crosswalk: N-Queens, Single number</p>
+</section>
+
+<h2 id="constraints">Input size to complexity</h2>
+<p class="lede">Constraints often reveal the intended approach. Rough budget: about 10⁸ simple operations per second in C++ or Java, closer to 10⁷ in Python.</p>
+<div class="refwrap"><div class="scroll"><table class="ref"><thead><tr><th scope="col">Input size</th><th scope="col">Target complexity</th><th scope="col">Typical approaches</th></tr></thead><tbody><tr><th scope="row">n ≤ 10 to 12</th><td>O(n!)</td><td>Permutations, brute-force orderings</td></tr><tr><th scope="row">n ≤ 20 to 25</th><td>O(2ⁿ) or O(2ⁿ · n)</td><td>Subsets, bitmask DP, meet in the middle at 40</td></tr><tr><th scope="row">n ≤ 500</th><td>O(n³)</td><td>Interval DP, Floyd-Warshall</td></tr><tr><th scope="row">n ≤ 5,000</th><td>O(n²)</td><td>Pairwise DP, two-sequence DP</td></tr><tr><th scope="row">n ≤ 10⁵ to 10⁶</th><td>O(n log n) or O(n)</td><td>Sorting, heaps, binary search, two pointers, sliding window, linear DP</td></tr><tr><th scope="row">Values up to 10⁹ or more</th><td>O(log value) factor</td><td>Binary search on the answer, math, bit tricks</td></tr></tbody></table></div></div>
+
+<h2 id="python">Python costs that bite</h2>
+<p class="lede">Hidden costs that turn an O(n) idea into an O(n²) program.</p>
+<div class="refwrap"><div class="scroll"><table class="ref"><thead><tr><th scope="col">Operation</th><th scope="col">Cost</th><th scope="col">Note</th></tr></thead><tbody><tr><th scope="row">list.append, list.pop()</th><td>O(1) amortized</td><td>Use as a stack</td></tr><tr><th scope="row">list.pop(0), list.insert(0, x)</th><td>O(n)</td><td>Use collections.deque for queues</td></tr><tr><th scope="row">x in list</th><td>O(n)</td><td>Use a set for membership</td></tr><tr><th scope="row">Slicing a[i:j]</th><td>O(j − i)</td><td>Copies; slicing in recursion hides O(n²)</td></tr><tr><th scope="row">s += piece in a loop</th><td>O(n²) worst case</td><td>Collect parts, then &#x27;&#x27;.join(parts)</td></tr><tr><th scope="row">dict and set operations</th><td>O(1) average</td><td>Keys must be hashable: tuples, not lists</td></tr><tr><th scope="row">heapq.heappush, heappop</th><td>O(log n)</td><td>Min-heap only; negate for max</td></tr><tr><th scope="row">heapq.heapify</th><td>O(n)</td><td>In place</td></tr><tr><th scope="row">bisect.bisect_left</th><td>O(log n)</td><td>Returns the insertion point</td></tr><tr><th scope="row">bisect.insort</th><td>O(n)</td><td>Search is log n but the insert shifts elements</td></tr><tr><th scope="row">sorted(xs, key=...)</th><td>O(n log n)</td><td>Stable; sort by multiple keys with a tuple</td></tr><tr><th scope="row">Counter.most_common(k)</th><td>O(n log k)</td><td>Without k it sorts everything</td></tr><tr><th scope="row">functools.cache</th><td>Memoization</td><td>Default recursion limit is about 1,000</td></tr><tr><th scope="row">sortedcontainers.SortedList</th><td>O(log n) add, remove, index</td><td>Often unavailable in interview environments</td></tr></tbody></table></div></div>
+
+<h2 id="edges">Edge cases</h2>
+<p class="lede">Worth running through before calling a solution done.</p>
+<dl class="themes"><div class="theme"><dt>Empty and tiny inputs</dt><dd>Empty array or string, a single element, two elements, K of 0 or K larger than n.</dd></div><div class="theme"><dt>Duplicates</dt><dd>All elements equal, duplicate answers that must be deduplicated, ties in sorting or heaps.</dd></div><div class="theme"><dt>Numeric limits</dt><dd>Negative numbers, zero, overflow in fixed-width languages, integer division rounding toward zero vs floor.</dd></div><div class="theme"><dt>Boundaries</dt><dd>First and last index, inclusive vs exclusive ranges, windows touching both ends.</dd></div><div class="theme"><dt>Graph shape</dt><dd>Disconnected components, self-loops, cycles, duplicate edges, a single node.</dd></div><div class="theme"><dt>Degenerate trees</dt><dd>A skewed tree (a linked list in disguise), null root, one child only.</dd></div><div class="theme"><dt>Strings</dt><dd>Unicode vs ASCII assumptions, case sensitivity, whitespace, very long strings.</dd></div><div class="theme"><dt>Mutation</dt><dd>Modifying input the caller still needs, iterating while modifying, aliasing a shared list.</dd></div></dl>
+
+<h2 id="lld">Low-level design</h2>
+<p class="lede">Common at staff level in place of, or alongside, algorithm rounds. The code is usually simpler; the evaluation is API shape, correctness under follow-ups, and extensibility.</p>
+<div class="scroll"><table class="wide"><thead><tr><th scope="col">Prompt</th><th scope="col">Core structures</th><th scope="col">What gets evaluated</th><th scope="col">Follow-ups</th></tr></thead><tbody><tr><th scope="row">LRU cache</th><td>Hash map + doubly linked list, or OrderedDict</td><td>O(1) get and put, clean eviction</td><td>LFU (frequency buckets), TTL expiry, byte-size limits, thread safety</td></tr><tr><th scope="row">In-memory key-value store with transactions</th><td>Dict plus a stack of undo logs per open transaction</td><td>Nested BEGIN, ROLLBACK, COMMIT semantics</td><td>Count keys with a value in O(1), TTL, snapshot reads</td></tr><tr><th scope="row">Versioned or time-based store</th><td>Per-key sorted lists of (timestamp, value) with bisect</td><td>Binary search correctness, append-only writes</td><td>Out-of-order writes, garbage collecting old versions</td></tr><tr><th scope="row">Rate limiter class</th><td>Token bucket per key, or deque of timestamps</td><td>Correct refill math, injected clock for testing</td><td>Thread safety, memory for idle keys, burst handling</td></tr><tr><th scope="row">Hit counter / logger throttling</th><td>Circular buffer of time buckets</td><td>Constant memory over a fixed window</td><td>Higher resolution, concurrency, out-of-order timestamps</td></tr><tr><th scope="row">Task scheduler</th><td>Heap keyed by next run time</td><td>Scheduling order, recurring tasks</td><td>Cancellation (lazy deletion), worker threads, missed runs</td></tr><tr><th scope="row">File system or path store</th><td>Trie of path segments</td><td>Clean API for mkdir, ls, read, write</td><td>Moves, sizes aggregated per directory, permissions</td></tr><tr><th scope="row">Autocomplete</th><td>Trie with ranked suggestions per node, or trie + heap</td><td>Query cost vs update cost</td><td>Frequency updates, typo tolerance, memory</td></tr><tr><th scope="row">Iterators</th><td>Stacks or generators over nested structure</td><td>Lazy evaluation, has_next semantics</td><td>Peeking, interleaving K iterators, remove support</td></tr><tr><th scope="row">Snake, tic-tac-toe, or minesweeper engine</th><td>Deque and set, row and column counters</td><td>O(1) move checks, clear state modeling</td><td>Board size generalization, undo</td></tr></tbody></table></div>
+
+<h2 id="concurrency">Concurrency</h2>
+<p class="lede">Usually in Java, Go, C++, or Python threading. Expect to write real synchronization, not describe it.</p>
+<div class="scroll"><table class="wide"><thead><tr><th scope="col">Prompt</th><th scope="col">Core structures</th><th scope="col">What gets evaluated</th><th scope="col">Follow-ups</th></tr></thead><tbody><tr><th scope="row">Bounded blocking queue</th><td>Lock with two condition variables (not full, not empty)</td><td>Wait in a while loop, not an if; notify correctly</td><td>Spurious wakeups, lost notifications, shutdown</td></tr><tr><th scope="row">Thread-safe cache or counter</th><td>Lock, lock striping, or atomics</td><td>Correctness first, then contention</td><td>Read-heavy access (read-write lock), per-key locking</td></tr><tr><th scope="row">Worker pool</th><td>Task queue, fixed threads, futures for results</td><td>Clean shutdown, error propagation</td><td>Backpressure when the queue fills, cancellation</td></tr><tr><th scope="row">Concurrent web crawler</th><td>Thread-safe visited set, work queue, workers</td><td>Termination detection when the queue is empty but work is in flight</td><td>Politeness per host, depth limits, deduplicating URLs</td></tr><tr><th scope="row">Read-write lock</th><td>Counters plus condition variable</td><td>Multiple readers or one writer</td><td>Writer starvation, upgrading a read lock</td></tr><tr><th scope="row">Rate limiter or scheduler, concurrent version</th><td>The single-threaded design plus locks or a timer thread</td><td>Atomic check-and-update</td><td>Clock drift, fairness between callers</td></tr><tr><th scope="row">Deadlock scenario (dining philosophers, bank transfers)</th><td>Global lock ordering, tryLock with timeout</td><td>Identifying the four conditions and breaking one</td><td>Livelock, priority inversion</td></tr></tbody></table></div>
+
+<h2 id="review">Code review and debugging</h2>
+<p class="lede">Some companies hand you a working but flawed pull request or a failing program. These are the categories of defects they plant.</p>
+<dl class="themes"><div class="theme"><dt>Correctness bugs</dt><dd>Off-by-one errors, unhandled empty input, mutating a collection while iterating, mutable default arguments, integer division.</dd></div><div class="theme"><dt>Concurrency defects</dt><dd>Check-then-act races, shared state without synchronization, holding locks across I/O, deadlock-prone lock ordering.</dd></div><div class="theme"><dt>Resource handling</dt><dd>Unclosed files and connections, missing timeouts, unbounded caches or queues, retries without backoff.</dd></div><div class="theme"><dt>Performance regressions</dt><dd>Nested loops over large inputs, N+1 queries, repeated string concatenation, recomputation that could be cached.</dd></div><div class="theme"><dt>Error handling</dt><dd>Swallowed exceptions, errors without context, partial failure leaving inconsistent state.</dd></div><div class="theme"><dt>API and structure</dt><dd>Unclear naming, leaky abstractions, functions doing several jobs, hard-to-test code with hidden dependencies such as the clock.</dd></div></dl>
+
+<footer>Problem names refer to widely known practice problems. Templates favor readability over micro-optimization.</footer>
+</main>
+</div>
+<script>
+(function(){
+  function wire(id, cls, key, onText, offText){
+    var btn=document.getElementById(id);
+    function apply(on){document.body.classList.toggle(cls,on);btn.setAttribute('aria-pressed',on?'true':'false');btn.textContent=on?onText:offText;}
+    var saved=false; try{saved=localStorage.getItem(key)==='1';}catch(e){}
+    apply(saved);
+    btn.addEventListener('click',function(){var on=!document.body.classList.contains(cls);apply(on);try{localStorage.setItem(key,on?'1':'0');}catch(e){}});
+  }
+  wire('hintToggle','hide-hints','hideHints','Show hints','Hide hints');
+  wire('codeToggle','hide-code','hideCode','Show templates','Hide templates');
+  var m=document.getElementById('matrix'); if(!m) return;
+  function clear(){m.querySelectorAll('.hl').forEach(function(x){x.classList.remove('hl');});}
+  m.addEventListener('mouseover',function(ev){
+    var cell=ev.target.closest('td,th'); if(!cell||!m.contains(cell)) return;
+    clear();
+    var row=cell.parentElement, idx=Array.prototype.indexOf.call(row.children,cell);
+    if(row.parentElement.tagName==='TBODY') Array.prototype.forEach.call(row.children,function(c){c.classList.add('hl');});
+    if(idx>0) m.querySelectorAll('tr').forEach(function(r){var c=r.children[idx]; if(c) c.classList.add('hl');});
+  });
+  m.addEventListener('mouseleave',clear);
+})();
+</script>
+</body>
+</html>

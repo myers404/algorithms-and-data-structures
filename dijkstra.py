@@ -2,6 +2,12 @@ import heapq
 
 
 def dijkstra(graph, start):
+    """Dijkstra: shortest paths from start via a min-heap of (dist, node).
+
+    Use when: weighted graph with non-negative edges, "cheapest/shortest
+    cost to reach X". graph[node] is a list of (neighbor, weight).
+    Time: O(E log V). Space: O(V).
+    """
     dist = {node: float("inf") for node in graph}
     dist[start] = 0
     heap = [(0, start)]

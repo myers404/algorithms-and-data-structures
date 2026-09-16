@@ -1,4 +1,10 @@
 def mergesort(arr):
+    """Merge sort: divide in half, sort each half, merge two sorted halves.
+
+    Use when: need guaranteed O(n log n) and stability (equal elements
+    keep relative order); good for linked lists (no random access needed).
+    Time: O(n log n) always. Space: O(n).
+    """
     if len(arr) <= 1:
         return arr
     mid = len(arr) // 2

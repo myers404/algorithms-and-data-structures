@@ -5,6 +5,14 @@ class TrieNode:
 
 
 class Trie:
+    """Trie (prefix tree): each edge is a character, is_word marks a
+    complete word ending at that node.
+
+    Use when: prefix search/autocomplete, word search on a grid,
+    "longest common prefix" over many strings.
+    Time: O(L) per op, L = word/prefix length. Space: O(total chars).
+    """
+
     def __init__(self):
         self.root = TrieNode()
 

@@ -1,4 +1,10 @@
 def binary_search(arr, target):
+    """Binary search: halve the search space on a sorted array.
+
+    Use when: array is sorted, or you can binary-search an answer
+    (monotonic predicate) instead of a value directly.
+    Time: O(log n). Space: O(1).
+    """
     lo, hi = 0, len(arr) - 1
     while lo <= hi:
         mid = (lo + hi) // 2
