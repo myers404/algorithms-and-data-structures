@@ -1,31 +1,30 @@
-#!/usr/bin/python
-# https://medium.com/100-days-of-algorithms/day-41-union-find-d0027148376d
-
 class UnionFind:
-	def __init__(self, data):
-		self.data = data
-		
-	def union(self, i, j):
-		pi, pj = self.find(i), self.find(j)
-		if pi != pj:
-			self.data[pi] = pj
-		
-	def find(self, i):
-		if i != self.data[i]:
-			self.data[i] = self.find(self.data[i])
-		return self.data[i]
-		
-	def connected(i, j):
-		return self.find(i) == self.find(j)
-		
-n = 10
-data = [i for i in range(n)]
-connections = [(0, 1), (1, 2), (0, 9), (5, 6), (6, 4), (5, 9)]
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [0] * n
 
-uf = UnionFind(data)
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
 
-for i, j in connections:
-	uf.union(i, j)
-	
-for i in range(n):
-	print('item', i, '-> component', uf.find(i))
+    def union(self, x, y):
+        rx, ry = self.find(x), self.find(y)
+        if rx == ry:
+            return
+        if self.rank[rx] < self.rank[ry]:
+            rx, ry = ry, rx
+        self.parent[ry] = rx
+        if self.rank[rx] == self.rank[ry]:
+            self.rank[rx] += 1
+
+
+if __name__ == "__main__":
+    uf = UnionFind(5)
+    uf.union(0, 1)
+    uf.union(1, 2)
+    assert uf.find(0) == uf.find(2)
+    assert uf.find(0) != uf.find(3)
+    uf.union(3, 4)
+    assert uf.find(3) == uf.find(4)
+    print("ok")
